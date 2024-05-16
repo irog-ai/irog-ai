@@ -1,4 +1,132 @@
 {
+  "api": {
+    "api": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "firstfunction"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "getcases"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "caseStatusUpdate"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "email"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "getphonenumber"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "getQuestions"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "getResponses"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "initiateSms"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "insertquestions"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "sms"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "submitcase"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "updateQuestions"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "updateResponsePdf"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "getfilecontent"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "Chatgptcall"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
   "auth": {
     "irogai81d98648": {
       "customAuth": false,
@@ -23,6 +151,364 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
+    }
+  },
+  "function": {
+    "Chatgptcall": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "caseStatusUpdate": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "email": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "firstfunction": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "getQuestions": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "getResponses": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "getcases": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "getfilecontent": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "getphonenumber": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "initiateSms": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "insertquestions": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "sms": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "submitcase": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "updateQuestions": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "updateResponsePdf": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_Chatgptcall_chatgptPrompt": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "Chatgptcall"
+        }
+      ]
+    },
+    "AMPLIFY_function_Chatgptcall_chatgptPromptAnswer": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "Chatgptcall"
+        }
+      ]
+    },
+    "AMPLIFY_function_Chatgptcall_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "Chatgptcall"
+        }
+      ]
+    },
+    "AMPLIFY_function_Chatgptcall_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "Chatgptcall"
+        }
+      ]
+    },
+    "AMPLIFY_function_Chatgptcall_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "Chatgptcall"
+        }
+      ]
+    },
+    "AMPLIFY_function_caseStatusUpdate_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "caseStatusUpdate"
+        }
+      ]
+    },
+    "AMPLIFY_function_caseStatusUpdate_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "caseStatusUpdate"
+        }
+      ]
+    },
+    "AMPLIFY_function_email_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "email"
+        }
+      ]
+    },
+    "AMPLIFY_function_email_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "email"
+        }
+      ]
+    },
+    "AMPLIFY_function_firstfunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "firstfunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_firstfunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "firstfunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_getQuestions_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getQuestions"
+        }
+      ]
+    },
+    "AMPLIFY_function_getQuestions_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getQuestions"
+        }
+      ]
+    },
+    "AMPLIFY_function_getResponses_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getResponses"
+        }
+      ]
+    },
+    "AMPLIFY_function_getResponses_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getResponses"
+        }
+      ]
+    },
+    "AMPLIFY_function_getcases_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getcases"
+        }
+      ]
+    },
+    "AMPLIFY_function_getcases_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getcases"
+        }
+      ]
+    },
+    "AMPLIFY_function_getfilecontent_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getfilecontent"
+        }
+      ]
+    },
+    "AMPLIFY_function_getfilecontent_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getfilecontent"
+        }
+      ]
+    },
+    "AMPLIFY_function_getphonenumber_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getphonenumber"
+        }
+      ]
+    },
+    "AMPLIFY_function_getphonenumber_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getphonenumber"
+        }
+      ]
+    },
+    "AMPLIFY_function_initiateSms_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "initiateSms"
+        }
+      ]
+    },
+    "AMPLIFY_function_initiateSms_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "initiateSms"
+        }
+      ]
+    },
+    "AMPLIFY_function_insertquestions_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "insertquestions"
+        }
+      ]
+    },
+    "AMPLIFY_function_insertquestions_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "insertquestions"
+        }
+      ]
+    },
+    "AMPLIFY_function_sms_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sms"
+        }
+      ]
+    },
+    "AMPLIFY_function_sms_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sms"
+        }
+      ]
+    },
+    "AMPLIFY_function_sms_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "sms"
+        }
+      ]
+    },
+    "AMPLIFY_function_submitcase_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "submitcase"
+        }
+      ]
+    },
+    "AMPLIFY_function_submitcase_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "submitcase"
+        }
+      ]
+    },
+    "AMPLIFY_function_updateQuestions_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "updateQuestions"
+        }
+      ]
+    },
+    "AMPLIFY_function_updateQuestions_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "updateQuestions"
+        }
+      ]
+    },
+    "AMPLIFY_function_updateResponsePdf_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "updateResponsePdf"
+        }
+      ]
+    },
+    "AMPLIFY_function_updateResponsePdf_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "updateResponsePdf"
+        }
+      ]
+    }
+  },
+  "storage": {
+    "storagebocketirog": {
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "S3"
     }
   }
 }

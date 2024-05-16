@@ -1,0 +1,14 @@
+{
+  "resourceName": "storagebocketirog",
+  "policyUUID": "429225e8",
+  "bucketName": "irogbucket",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

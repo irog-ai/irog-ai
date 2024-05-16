@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "paths": {
+    "/firstfunction/{id}": {
+      "name": "/firstfunction/{id}",
+      "lambdaFunction": "firstfunction",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/getcases": {
+      "name": "/getcases",
+      "lambdaFunction": "getcases",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/caseStatusUpdate/{status}": {
+      "name": "/caseStatusUpdate/{status}",
+      "lambdaFunction": "caseStatusUpdate",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/email": {
+      "name": "/email",
+      "lambdaFunction": "email",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/getphonenumber/{id}": {
+      "name": "/getphonenumber/{id}",
+      "lambdaFunction": "getphonenumber",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/getQuestions/{id}": {
+      "name": "/getQuestions/{id}",
+      "lambdaFunction": "getQuestions",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/getResponses/{questionId}": {
+      "name": "/getResponses/{questionId}",
+      "lambdaFunction": "getResponses",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/initiateSms/{id}": {
+      "name": "/initiateSms/{id}",
+      "lambdaFunction": "initiateSms",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/insertquestions": {
+      "name": "/insertquestions",
+      "lambdaFunction": "insertquestions",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/sms": {
+      "name": "/sms",
+      "lambdaFunction": "sms",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/submitcase": {
+      "name": "/submitcase",
+      "lambdaFunction": "submitcase",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/updateQuestions": {
+      "name": "/updateQuestions",
+      "lambdaFunction": "updateQuestions",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/updateResponsePdf/{id}": {
+      "name": "/updateResponsePdf/{id}",
+      "lambdaFunction": "updateResponsePdf",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/getfilecontent/{key}": {
+      "name": "/getfilecontent/{key}",
+      "lambdaFunction": "getfilecontent",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/Chatgptcall/{question}": {
+      "name": "/Chatgptcall/{question}",
+      "lambdaFunction": "Chatgptcall",
+      "permissions": {
+        "setting": "open"
+      }
+    }
+  }
+}
