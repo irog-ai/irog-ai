@@ -1,13 +1,11 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { useLocation } from "react-router-dom";
 import DoneIcon from "@mui/icons-material/Done";
 import AttestDialog from "./ReusableComponents/AttestDialog";
 import * as myConstClass from "../Util/Constants";
 import ChatDialog from "./ReusableComponents/ChatDialog";
-import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
-import WarningIcon from "@mui/icons-material/Warning";
 import Breadcrumb from "./ReusableComponents/Breadcrumb";
 import Slide from "@mui/material/Slide";
 import WebllinkDialog from "./ReusableComponents/Weblinkdialog";
@@ -15,10 +13,8 @@ import ViewResponseDialog from "./ReusableComponents/ViewResponseDialog";
 import Paper from "@mui/material/Paper";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import QuestionsTable from "./ReusableComponents/QuestionsTable";
-import SendIcon from "@mui/icons-material/Send";
 import DownloadIcon from "@mui/icons-material/Download";
 import { API, Storage } from "aws-amplify";
-import { SES } from "@aws-sdk/client-ses";
 import Loading from "./ReusableComponents/Loading";
 import StatusStepper from "./ReusableComponents/StatusStepper";
 import Typography from "@mui/material/Typography";
@@ -26,55 +22,26 @@ import { Auth } from "aws-amplify";
 import CancelDialog from "./ReusableComponents/CancelDialog";
 import CompleteDialog from "./ReusableComponents/CompleteDialog";
 import WordGenerator from "./ReusableComponents/WordGenerator";
-import {
-  PDFDownloadLink,
-  Page,
-  Text,
-  View,
-  Document,
-  StyleSheet,
-  Section,
-} from "@react-pdf/renderer";
+import { withAuthenticator } from "@aws-amplify/ui-react";
+import Sidebar from "./ReusableComponents/Sidebar";
 
 import {
   IconButton,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Grid,
   TextField,
-  CircularProgress,
-  Box,
-  Icon,
+  Box
 } from "@mui/material";
-import { StadiumTwoTone, Troubleshoot } from "@mui/icons-material";
-import { ClassNames } from "@emotion/react";
 
-//import FileUploadComponent from "./UploadFileComponent";
-//import { red } from "@mui/material/colors";
 const myAPI = "api";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: "row",
-    backgroundColor: "#E4E4E4",
-  },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
-  },
-});
 
-export default function Home(props) {
+
+ function Home({ signOut }) {
   const location = useLocation();
   const selectedRow = location.state !== null ? location.state : null;
 
@@ -121,7 +88,6 @@ export default function Home(props) {
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
-    console.log("CALLED>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
     if (
       location.state !== undefined &&
@@ -134,7 +100,6 @@ export default function Home(props) {
       let path = "/getQuestions";
       let tableData = [];
       console.log(selectedRow); // output: "the-page-id"
-      let questionTabledata = [];
       async function getData() {
         const formData = new FormData();
         console.log(selectedRow.Id);
@@ -147,16 +112,8 @@ export default function Home(props) {
           console.log(response);
           tableData = await response.recordsets[1];
           selectedRow = response.recordsets[0][0];
-          console.log("----------------------------------------------");
-          console.log(response.recordsets[0]);
-          console.log(tableData);
+          
         });
-        // let status = selectedRow.Status;
-        // let cancelQueue = "";
-        // if(status.toString().includes(",")){
-        //   status=myConstClass.STATUS_CANCEL;
-        //   cancelQueue=status
-        // }
 
         setState({
           ...state,
@@ -166,7 +123,6 @@ export default function Home(props) {
           middleName: selectedRow.MiddleName,
           phoneNumber: selectedRow.PhoneNumber,
           emailAddress: selectedRow.EmailId,
-          //chatInitiatedForCase: selectedRow.ChatInitiated,
           s3bucketfileName: selectedRow.s3BucketFileName,
           createCasePage: false,
           caseId: selectedRow.Id,
@@ -189,22 +145,7 @@ export default function Home(props) {
     }
   }, []);
 
-  const viewResponse = async (row) => {
-    // setState({ ...state, isLoading: true });
-    // const path = "/getResponses";
-    // const formData = new FormData();
-    // formData.append("questionId", questionId);
-    // let responses = [];
-
-    // await API.get(myAPI, path + "/" + questionId, {
-    //   headers: {
-    //     "Content-Type": "text/plain",
-    //   },
-    // }).then((resultset) => {
-    //   console.log(resultset.recordset);
-    //   responses = resultset.recordset;
-    //   console.log(responses);
-    // });
+  const viewResponse = async (row) => {    
     setState({
       ...state,
       isLoading: false,
@@ -256,7 +197,6 @@ export default function Home(props) {
     setState({
       ...state,
       emailSent: true,
-      //showSendWebLinkDialog: true,
       isLoading: false,
       status: myConstClass.STATUS_AWAITING,
       emailChannelInitiated: true,
@@ -324,33 +264,8 @@ export default function Home(props) {
       status: myConstClass.STATUS_AWAITING,
     });
   };
+
   
-  const sendSms = async (question, Id, SNo) => {
-    let Updatedtable = null;
-    const formData = new FormData();
-    formData.append("text", question);
-    formData.append("SNo", SNo);
-    formData.append("phoneNumber", "+1" + state.phoneNumber);
-    formData.append(
-      "insertedId",
-      state.insertedId === 0 ? state.caseId : state.insertedId
-    );
-    await axios
-      .post("http://localhost:5000/sendSms", formData)
-      .then(async (response) => {
-        console.log(response);
-        formData.append("Id", Id);
-        await axios
-          .post("http://localhost:5000/updateFirstQuestion", formData)
-          .then((response) => {
-            console.log(response);
-            Updatedtable = response.data.recordset;
-          });
-      });
-
-    return Updatedtable;
-  };
-
   const handleChange = (e) => {
     let newState = { ...state };
     newState[e.target.name] = e.target.value;
@@ -382,8 +297,7 @@ export default function Home(props) {
     try {
       const response = await Storage.get(filename);
       console.log(response);
-      if(updateState)
-        setState({...state,responseFileName:filename})
+      if (updateState) setState({ ...state, responseFileName: filename });
       window.open(response); // Open the file URL in a new tab for download
     } catch (error) {
       console.error("Error downloading file", error);
@@ -428,12 +342,7 @@ export default function Home(props) {
     });
   };
 
-  const handleAttest = () => {};
-
-  // const onSubmit = async () => {
-
-  //   console.log(user);
-  // }
+  
 
   const onSubmit = async () => {
     setState({
@@ -459,7 +368,6 @@ export default function Home(props) {
     );
 
     console.log(CaseNumber);
-    //formData.append("insertObj", JSON.stringify(insertObj));
     formData.append("FirstName", state.firstName);
     formData.append("LastName", state.lastName);
     formData.append("MiddleName", state.middleName);
@@ -497,7 +405,6 @@ export default function Home(props) {
       formData.append("insertObj", JSON.stringify(insertObj));
 
       console.log(response);
-      //setState({ ...state, value: 30, loadingtext: "Inserting questions..." });
       await API.post(myAPI, path2, { body: formData }).then(async () => {
         console.log("Succesfully.");
         formData.append("insertedId", insertedId.toString());
@@ -564,8 +471,8 @@ export default function Home(props) {
   };
 
   const changeIsLoading = () => {
-    setState({...state, isLoading:!state.isLoading});
-  }
+    setState({ ...state, isLoading: !state.isLoading });
+  };
 
   const handleCancel = async () => {
     setState({ ...state, isLoading: true });
@@ -658,7 +565,8 @@ export default function Home(props) {
   };
 
   return !state.isLoading ? (
-    <Box style={{ marginTop: "4%" }} sx={{ flexGrow: 1, p: 3 }}>
+    <Box  sx={{ flexGrow: 1, p: 3 }}>
+      {/* <Sidebar signOut={signOut} /> */}
       <ViewResponseDialog
         open={state.showResponsesDialog}
         Transition={Transition}
@@ -696,7 +604,7 @@ export default function Home(props) {
         chatInitiatedForCase={state.chatInitiatedForCase}
         startConversation={startConversation}
         handleClose={handleDialogClose}
-        phoneNumber = {state.phoneNumber}
+        phoneNumber={state.phoneNumber}
       />
 
       <React.Fragment>
@@ -819,7 +727,10 @@ export default function Home(props) {
                       }
                       startIcon={
                         state.status !== myConstClass.STATUS_NEW && (
-                          <DoneIcon fontSize="small" style={{color:"green"}}></DoneIcon>
+                          <DoneIcon
+                            fontSize="small"
+                            style={{ color: "green" }}
+                          ></DoneIcon>
                         )
                       }
                     >
@@ -842,7 +753,10 @@ export default function Home(props) {
                       }
                       startIcon={
                         state.chatInitiatedForCase && (
-                          <DoneIcon fontSize="small" style={{color:"green"}}></DoneIcon>
+                          <DoneIcon
+                            fontSize="small"
+                            style={{ color: "green" }}
+                          ></DoneIcon>
                         )
                       }
                     >
@@ -864,7 +778,10 @@ export default function Home(props) {
                       }
                       startIcon={
                         state.emailChannelInitiated && (
-                          <DoneIcon fontSize="small" style={{color:"green"}}></DoneIcon>
+                          <DoneIcon
+                            fontSize="small"
+                            style={{ color: "green" }}
+                          ></DoneIcon>
                         )
                       }
                     >
@@ -872,7 +789,7 @@ export default function Home(props) {
                         ? "Send WebLink"
                         : "Re-send Weblink"}
                     </Button>
-                  )}                  
+                  )}
 
                   {state.questionTable.length > 0 && (
                     <Button
@@ -913,8 +830,7 @@ export default function Home(props) {
                     textAlign: "left",
                     marginLeft: "20px",
                   }}
-                >                  
-                </Grid>
+                ></Grid>
               </React.Fragment>
             )}
             {state.createCasePage && !state.showTable && (
@@ -998,16 +914,18 @@ export default function Home(props) {
                 style={{ display: "flex", justifyContent: "flex-end" }}
               >
                 {state.questionTable.length > 0 && (
-                    <Button
-                      style={{ marginLeft: "20px" }}
-                      variant="outlined"
-                      onClick={() => handleDownload(state.s3bucketfileName,false)}
-                      startIcon={<DownloadIcon />}
-                    >
-                      Questionnaire
-                    </Button>
-                  )}
-                  {state.status === myConstClass.STAUS_COMPLETE && (
+                  <Button
+                    style={{ marginLeft: "20px" }}
+                    variant="outlined"
+                    onClick={() =>
+                      handleDownload(state.s3bucketfileName, false)
+                    }
+                    startIcon={<DownloadIcon />}
+                  >
+                    Questionnaire
+                  </Button>
+                )}
+                {state.status === myConstClass.STAUS_COMPLETE && (
                   <WordGenerator
                     caseid={state.caseId}
                     handleDownload={handleDownload}
@@ -1015,13 +933,13 @@ export default function Home(props) {
                     questionTable={state.questionTable}
                     changeIsLoading={changeIsLoading}
                   />
-                  )}
+                )}
                 <IconButton variant="contained" onClick={refresh}>
                   <RefreshIcon />
                 </IconButton>
               </Grid>
 
-              <Grid item xs={12} style={{marginTop:"10px"}}>
+              <Grid item xs={12} style={{ marginTop: "10px" }}>
                 <QuestionsTable
                   rows={state.questionTable}
                   viewResponse={viewResponse}
@@ -1037,3 +955,5 @@ export default function Home(props) {
     <Loading />
   );
 }
+
+export default withAuthenticator(Home);

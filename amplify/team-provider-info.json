@@ -22,7 +22,7 @@
         },
         "getcases": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/getcases-78485a3241777844506b-build.zip"
+          "s3Key": "amplify-builds/getcases-75325948386963793773-build.zip"
         },
         "caseStatusUpdate": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",

@@ -9,13 +9,15 @@ import Typography from "@mui/material/Typography";
 import FilterBar from "./ReusableComponents/FilterBar";
 import * as myConstClass from "../Util/Constants";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { withAuthenticator } from "@aws-amplify/ui-react";
+import Sidebar from "./ReusableComponents/Sidebar";
 
 import { Button, Grid, Box } from "@mui/material";
 
 const myAPI = "api";
 const path = "/getcases";
 
-export default function BasicTextFields() {
+function LandingPage({ signOut }) {
   let initialState = {
     rows: [],
     columns: [],
@@ -40,11 +42,11 @@ export default function BasicTextFields() {
     })
       .then((response) => {
         console.log(response);
-        response.recordset.forEach(element => {
-          if(element.Status.includes(",")) {
+        response.recordset.forEach((element) => {
+          if (element.Status.includes(",")) {
             element.CancelQueue = element.Status;
-            element.Status=myConstClass.STATUS_CANCEL;            
-          } 
+            element.Status = myConstClass.STATUS_CANCEL;
+          }
         });
         setState({
           ...state,
@@ -99,51 +101,52 @@ export default function BasicTextFields() {
 
   return !state.isLoading ? (
     <Box
-      style={{ marginTop: "5%" }}
+      //style={{ marginTop: "10%" }}
       component="main"
-      sx={{ flexGrow: 1, p: 3 }}
+      sx={{ flexGrow: 1}}
     >
-      {/* //{state.filteredTabledata.length > 0 && ( */}
-        <React.Fragment>
-          <FilterBar
-            tableData={state.tableData}
-            filterTbaleData={filterTbaleData}
-            selectedFilter={state.selectedFilter}
-          />
-          <Grid container alignItems="center">
-            <Grid item xs={6}>
-              <Typography
-                variant="h6"
-                gutterBottom
-                style={{ marginTop: "20px", marginBottom: "20px" }}
-              >
-                Case History
-              </Typography>
-            </Grid>
-            {!(state.selectedFilter === "" ||
-              state.selectedFilter === myConstClass.STATUS_ALL) && (
-                <Grid
-                  item
-                  xs={6}
-                  style={{ display: "flex", justifyContent: "flex-end" }}
-                >
-                  <Button
-                    onClick={() => filterTbaleData(myConstClass.STATUS_ALL)}
-                    variant="text"
-                    //disabled={awaitingListCount === 0}
-                    startIcon={<RefreshIcon />}
-                  >
-                    {"Reset Filters"}
-                  </Button>
-                </Grid>
-              )}
+      <React.Fragment>
+        <FilterBar
+          tableData={state.tableData}
+          filterTbaleData={filterTbaleData}
+          selectedFilter={state.selectedFilter}
+        />
+        <Grid container alignItems="center">
+          <Grid item xs={6}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              style={{ marginTop: "20px", marginBottom: "20px" }}
+            >
+              Case History
+            </Typography>
           </Grid>
+          {!(
+            state.selectedFilter === "" ||
+            state.selectedFilter === myConstClass.STATUS_ALL
+          ) && (
+            <Grid
+              item
+              xs={6}
+              style={{ display: "flex", justifyContent: "flex-end" }}
+            >
+              <Button
+                onClick={() => filterTbaleData(myConstClass.STATUS_ALL)}
+                variant="text"
+                startIcon={<RefreshIcon />}
+              >
+                {"Reset Filters"}
+              </Button>
+            </Grid>
+          )}
+        </Grid>
 
-          <HomePageTable rows={state.filteredTabledata} />
-        </React.Fragment>
-      {/* )} */}
+        <HomePageTable rows={state.filteredTabledata} />
+      </React.Fragment>
     </Box>
   ) : (
     <Loading />
   );
 }
+
+export default withAuthenticator(LandingPage);

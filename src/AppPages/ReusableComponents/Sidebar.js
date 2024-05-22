@@ -12,14 +12,13 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import HomeIcon from "@mui/icons-material/Home";
 import AddIcon from "@mui/icons-material/Add";
 import { Button } from "@aws-amplify/ui-react";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -49,7 +48,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "flex-end",
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
 }));
 
@@ -88,17 +86,16 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-export default function Sidebar(props) {
+export default function SidebarLayout() {
   const theme = useTheme();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
   const itemsList = [
     {
-      
       text: "Home",
       icon: <HomeIcon />,
-      onClick: () => navigate("/"),
+      onClick: () => navigate("/home"),
     },
     {
       text: "Add Case",
@@ -116,9 +113,9 @@ export default function Sidebar(props) {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", flexGrow: 1 }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open} style={{background:"#0041A5"}}>
+      <AppBar position="fixed" open={open} style={{ background: "#2c4376" }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -136,7 +133,7 @@ export default function Sidebar(props) {
             Welcome! to Steve's Legit Hub
           </Typography>
           <Button
-            onClick={props.signOut}
+            onClick={() => navigate('/logout')} // Assuming you have a logout route or function
             style={{ position: "absolute", top: "10px", right: "10px" }}
           >
             Sign Out
@@ -155,51 +152,37 @@ export default function Sidebar(props) {
         </DrawerHeader>
         <Divider />
         <List>
-          {itemsList.map((item, index) => {
-            const { text, icon, onClick } = item;
-            return (
-              <ListItemButton
+          {itemsList.map((item) => (
+            <ListItemButton
+              sx={{
+                minHeight: 48,
+                justifyContent: open ? "initial" : "center",
+                px: 2.5,
+              }}
+              onClick={item.onClick}
+              key={item.text}
+            >
+              <ListItemIcon
                 sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
+                  minWidth: 0,
+                  mr: open ? 3 : "auto",
+                  justifyContent: "center",
                 }}
-                onClick={item.onClick}
-                key={item.text}
               >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            );
-          })}
-          
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} sx={{ opacity: open ? 1 : 0 }} />
+            </ListItemButton>
+          ))}
         </List>
-      </Drawer>    
-      {/* <Box
+      </Drawer>
+      <Box
         component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          transition: theme.transitions.create("margin", {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-          marginLeft: `calc(-${drawerWidth}px + ${
-            open ? theme.spacing(9) : theme.spacing(7)
-          })`,
-        }}
+        sx={{ flexGrow: 1, p: 3 }} // Ensure content is below the AppBar
       >
-        <h1>Hey</h1>
-        {props.children}
-      </Box> */}
+        <DrawerHeader />
+        <Outlet /> {/* This is where the nested routes will render */}
+      </Box>
     </Box>
   );
 }

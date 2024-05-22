@@ -32,7 +32,7 @@ export default function FilterBar(props) {
   ).length;
 
   return (
-    <Stack direction="row" spacing={3}>
+    <Stack direction="row" spacing={1}>
       {/* <DemoPaper variant="elevation">
         <Button
           onClick={() => props.filterTbaleData(myConstClas.STATUS_ALL)}
