@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import myImage from "../../AppHomeImage.JPG";
+import { Storage } from "aws-amplify";
 import "@fontsource/catamaran";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,6 +13,9 @@ import {
   Button,
 } from "@mui/material";
 import { styled } from "@mui/system";
+
+// const imageUrl =
+//   "https://irogbucket6152b-staging.s3.amazonaws.com/public/Assets/AppHomeImage.JPG";
 
 const Banner = styled("div")(({ theme }) => ({
   height: "600px",
@@ -35,6 +39,7 @@ const sectionStyle = {
 };
 
 function MainLandingPage() {
+  const [imageUrl, setImageUrl] = useState("");
   // const [scrolled, setScrolled] = useState(false);
   // const [selectedButton, setSelectedButton] = useState("home");
   // const navigate = useNavigate();
@@ -61,10 +66,22 @@ function MainLandingPage() {
   //   }
   // };
 
-  // useEffect(() => {
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        // Replace 'image-key' with the key of your image in the S3 bucket
+
+        const url = await Storage.get("AppHomeImage.JPG", { level: "public" });
+
+        setImageUrl(url);
+        console.log(url);
+      } catch (error) {
+        console.error("Error fetching image from S3", error);
+      }
+    };
+
+    fetchImage();
+  }, []);
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* Navigation Bar */}
@@ -171,7 +188,7 @@ function MainLandingPage() {
           </Grid>
           <Grid item xs={5}>
             <img
-              src={myImage}
+              src={imageUrl}
               alt="Image from public"
               style={{ width: "450px", height: "480px", marginTop: "15%" }}
             />
