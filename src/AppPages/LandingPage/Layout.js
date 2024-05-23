@@ -89,7 +89,7 @@ const Layout = () => {
               borderRadius: '5px',
               margin: '15px',
             }}
-            onClick={() => handleButtonClick('login', '/Home')}
+            onClick={() => handleButtonClick('login', '/Landingpage')}
             color="inherit"
           >
             LOGIN

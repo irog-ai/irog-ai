@@ -121,6 +121,30 @@
           ],
           "category": "function",
           "resourceName": "Chatgptcall"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "getLawyers"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "addLawyer"
+        },
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "deleteLawyer"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -159,7 +183,17 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "addLawyer": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "caseStatusUpdate": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "deleteLawyer": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
@@ -170,6 +204,11 @@
       "service": "Lambda"
     },
     "firstfunction": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "getLawyers": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
@@ -271,6 +310,22 @@
         }
       ]
     },
+    "AMPLIFY_function_addLawyer_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addLawyer"
+        }
+      ]
+    },
+    "AMPLIFY_function_addLawyer_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "addLawyer"
+        }
+      ]
+    },
     "AMPLIFY_function_caseStatusUpdate_deploymentBucketName": {
       "usedBy": [
         {
@@ -284,6 +339,22 @@
         {
           "category": "function",
           "resourceName": "caseStatusUpdate"
+        }
+      ]
+    },
+    "AMPLIFY_function_deleteLawyer_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "deleteLawyer"
+        }
+      ]
+    },
+    "AMPLIFY_function_deleteLawyer_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "deleteLawyer"
         }
       ]
     },
@@ -316,6 +387,22 @@
         {
           "category": "function",
           "resourceName": "firstfunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_getLawyers_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getLawyers"
+        }
+      ]
+    },
+    "AMPLIFY_function_getLawyers_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getLawyers"
         }
       ]
     },

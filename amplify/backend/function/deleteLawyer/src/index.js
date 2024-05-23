@@ -3,8 +3,9 @@
 const aws = require("aws-sdk");
 
 exports.handler =async (event) => {
-    const id = event.pathParameters.questionId;
-//     const { Parameters } = await new aws.SSM()
+    const id = event.pathParameters.id;
+    //console.log("Hellooooooooooooooooooooo"+id)
+//   const { Parameters } = await new aws.SSM()
 //     .getParameters({
 //       Names: ["DB_USERNAME", "DB_PASS"].map(        
 //         (secretName) => process.env[secretName]
@@ -34,9 +35,9 @@ exports.handler =async (event) => {
         reject(err);
       } else {
         const request = new sql.Request();
-        request.input("questionId", sql.NVarChar, id);  
+        request.input("id", sql.NVarChar, id);  
       
-        const selectQuery =`SELECT * FROM WebResponses WHERE QuestionId = @questionId and IsActive=1`;
+        const selectQuery =`update LawyerInfo set IsActive=0 where Id=@id`;
         request.query(selectQuery, (err, result) => {
           if (err) {
             reject(err);

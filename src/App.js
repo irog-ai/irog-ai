@@ -19,9 +19,12 @@ import Submit from "./AppPages/SubmitForm/Submit";
 import Faq from "./AppPages/FaqPage";
 import Layout from "./AppPages/LandingPage/Layout";
 import Contactus from "./AppPages/Contactus";
+import LawyerInfo from "./AppPages/LawyerInfo";
 import Drawer from "./AppPages/ReusableComponents/Drawer";
 import styles from "./App.css";
 import Sidebar from "./AppPages/ReusableComponents/Sidebar";
+import ProtectedRoute from "./AppPages/ReusableComponents/ProtectedRoute";
+import UnauthorizedPage from "./AppPages/ReusableComponents/Unauthorized";
 
 function App() {
   const location = useLocation();
@@ -55,9 +58,19 @@ function App() {
         </Route>
         <Route element={<Sidebar />}>
           <Route path="Case" element={<Home />} />
-          <Route path="Home" element={<LandingPage />} />
+          <Route path="Landingpage" element={<LandingPage />} />
           <Route path="AddNewCase" element={<AddNewCase />} />
+          {/* <Route path="Lawyer" element={<LawyerInfo />} /> */}
+          <Route
+            path="Lawyer"
+            element={
+              <ProtectedRoute allowedGroups={["Admin"]}>
+                <LawyerInfo />
+              </ProtectedRoute>
+            }
+          />
         </Route>
+        <Route path="/Unauthorized" element={<UnauthorizedPage />}/>
         <Route exact path="/Submit/:key" element={<Submit />} />
       </Routes>
     </div>

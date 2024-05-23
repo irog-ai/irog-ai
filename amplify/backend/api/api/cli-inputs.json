@@ -105,6 +105,27 @@
       "permissions": {
         "setting": "open"
       }
+    },
+    "/getLawyers": {
+      "name": "/getLawyers",
+      "lambdaFunction": "getLawyers",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/addLawyer": {
+      "name": "/addLawyer",
+      "lambdaFunction": "addLawyer",
+      "permissions": {
+        "setting": "open"
+      }
+    },
+    "/deleteLawyer/{id}": {
+      "name": "/deleteLawyer/{id}",
+      "lambdaFunction": "deleteLawyer",
+      "permissions": {
+        "setting": "open"
+      }
     }
   }
 }

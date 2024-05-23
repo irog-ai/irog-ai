@@ -22,15 +22,15 @@
         },
         "getcases": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/getcases-75325948386963793773-build.zip"
+          "s3Key": "amplify-builds/getcases-594c2b42496168655a30-build.zip"
         },
         "caseStatusUpdate": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/caseStatusUpdate-39664e2b324e30795176-build.zip"
+          "s3Key": "amplify-builds/caseStatusUpdate-726576436d7470393135-build.zip"
         },
         "Chatgptcall": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/Chatgptcall-6d76695a4278487a7358-build.zip",
+          "s3Key": "amplify-builds/Chatgptcall-4533484d356e3733555a-build.zip",
           "secretsPathAmplifyAppId": "d8fil6fk6i7h6",
           "chatgptPrompt": "Convert this question into layman language:",
           "chatgptPromptAnswer": "Rephrase the below senetence into attorney language:"
@@ -45,40 +45,52 @@
         },
         "getphonenumber": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/getphonenumber-3352374d594f55347137-build.zip"
+          "s3Key": "amplify-builds/getphonenumber-2b645438356e784f2f74-build.zip"
         },
         "getQuestions": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/getQuestions-513949434e754f785164-build.zip"
+          "s3Key": "amplify-builds/getQuestions-4966685a5a6946764f71-build.zip"
         },
         "getResponses": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/getResponses-675a6773533644613253-build.zip"
+          "s3Key": "amplify-builds/getResponses-54593171474168494a44-build.zip"
         },
         "initiateSms": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/initiateSms-6d6b70664530772b7357-build.zip"
+          "s3Key": "amplify-builds/initiateSms-78347063715968544250-build.zip"
         },
         "insertquestions": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/insertquestions-67495173725070695839-build.zip"
+          "s3Key": "amplify-builds/insertquestions-5a67357a484941376756-build.zip"
         },
         "sms": {
           "secretsPathAmplifyAppId": "d8fil6fk6i7h6",
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/sms-72675974302b7738446e-build.zip"
+          "s3Key": "amplify-builds/sms-634463596c5251476630-build.zip"
         },
         "submitcase": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/submitcase-54522b506537584c7067-build.zip"
+          "s3Key": "amplify-builds/submitcase-4861767171645636464e-build.zip"
         },
         "updateQuestions": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/updateQuestions-316b7342667564364c30-build.zip"
+          "s3Key": "amplify-builds/updateQuestions-705869387169666e4a4d-build.zip"
         },
         "updateResponsePdf": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/updateResponsePdf-6450714f536669667955-build.zip"
+          "s3Key": "amplify-builds/updateResponsePdf-7a35723561786f744572-build.zip"
+        },
+        "getLawyers": {
+          "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
+          "s3Key": "amplify-builds/getLawyers-544a6b79654a2b664846-build.zip"
+        },
+        "addLawyer": {
+          "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
+          "s3Key": "amplify-builds/addLawyer-6e464f6f427a43373830-build.zip"
+        },
+        "deleteLawyer": {
+          "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
+          "s3Key": "amplify-builds/deleteLawyer-436f6375534248725a45-build.zip"
         }
       },
       "api": {

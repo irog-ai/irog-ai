@@ -70,7 +70,7 @@
         } else {
           const request = new sql.Request();
   
-          const query = "select *,'' as CancelQueue from cases";
+          const query = "SELECT c.*,'' AS CancelQueue, l.FirstName + ' ' + l.LastName AS Lawyer FROM cases c JOIN lawyerInfo l ON  l.Id = c.LawyerId;";
           request.query(query, (err, result) => {
             if (err) {
               reject(err);

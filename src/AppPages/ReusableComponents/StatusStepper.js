@@ -13,7 +13,7 @@ export default function StatusStepper(props) {
     myConstClass.STAUS_COMPLETE,
   ];
   let activeStep = 0;
-  if (props.cancelQueue !== "") {
+  if (props.cancelQueue !== "" && props.cancelQueue !== undefined) {
     steps = props.cancelQueue.split(",");
     activeStep = steps.length - 1;
   } else {

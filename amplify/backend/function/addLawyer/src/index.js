@@ -52,17 +52,6 @@ exports.handler = async (event) => {
   //let formdata = decodeformdata.decodeformdata(decodedString);
   console.log(formdata);
   console.log(formdata.FirstName);
-//   const { Parameters } = await new aws.SSM()
-//     .getParameters({
-//       Names: ["DB_USERNAME", "DB_PASS"].map(
-//         (secretName) => process.env[secretName]
-//       ),
-//       WithDecryption: true,
-//     })
-//     .promise();
-
-  //console.log(Parameters);
-
   const promise = new Promise((resolve, reject) => {
     let sql = require("mssql");
 
@@ -86,17 +75,10 @@ exports.handler = async (event) => {
         const request = new sql.Request();
         request.input("FirstName", sql.NVarChar, formdata.FirstName);
         request.input("LastName", sql.NVarChar, formdata.LastName);
-        request.input("PhoneNumber", sql.Numeric, formdata.PhoneNumber);
         request.input("EmailId", sql.NVarChar, formdata.EmailId);
-        request.input("CaseId", sql.NVarChar, formdata.CaseId);
-        request.input("MiddleName", sql.NVarChar, formdata.MiddleName);
-        request.input("s3BucketFileName",sql.NVarChar,formdata.s3BucketFileName)
-        request.input("Status",sql.NVarChar,formdata.Status)
-        request.input("LoggedInUser",sql.NVarChar,formdata.loggedinuser);
-        request.input("LoggedInUserEmail",sql.NVarChar,formdata.loggedInuseremail);
-        request.input("LawyerId", sql.Int, formdata.selectedLawyerId)
+       
         const insertionQuery =
-          "INSERT INTO [Cases] (FirstName,MiddleName,LastName, PhoneNumber,EmailId, CaseId, s3BucketFileName, Status, LoggedInUser, LoggedInUserEmail, CreateTimeStamp, LawyerId) VALUES (@FirstName,@MiddleName, @LastName,@PhoneNumber,@EmailId, @CaseId, @s3BucketFileName, @Status, @LoggedInUser, @LoggedInUserEmail, getdate(), @LawyerId) SELECT SCOPE_IDENTITY() as id";
+          "INSERT INTO [LawyerInfo] (FirstName,LastName, Email, IsActive, InsertedTimeStamp) VALUES (@FirstName, @LastName,@EmailId, 1, getdate()) SELECT SCOPE_IDENTITY() as id";
         //let values = JSON.parse(req.body.insertObj);
         request.query(insertionQuery, (err, result) => {
           if (err) {

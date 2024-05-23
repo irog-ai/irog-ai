@@ -17,8 +17,14 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import HomeIcon from "@mui/icons-material/Home";
 import AddIcon from "@mui/icons-material/Add";
+import BalanceIcon from '@mui/icons-material/Balance';
 import { Button } from "@aws-amplify/ui-react";
 import { Outlet, useNavigate } from "react-router-dom";
+import {
+  withAuthenticator
+  
+} from "@aws-amplify/ui-react";
+
 
 const drawerWidth = 240;
 
@@ -86,7 +92,7 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-export default function SidebarLayout() {
+function SidebarLayout({signOut}) {
   const theme = useTheme();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
@@ -95,13 +101,18 @@ export default function SidebarLayout() {
     {
       text: "Home",
       icon: <HomeIcon />,
-      onClick: () => navigate("/home"),
+      onClick: () => navigate("/Landingpage"),
     },
     {
       text: "Add Case",
       icon: <AddIcon />,
       onClick: () => navigate("/Case"),
     },
+    {
+      text: "Lawyer Info",
+      icon:<BalanceIcon />,
+      onClick: () => navigate("/Lawyer")
+    }
   ];
 
   const handleDrawerOpen = () => {
@@ -133,7 +144,7 @@ export default function SidebarLayout() {
             Welcome! to Steve's Legit Hub
           </Typography>
           <Button
-            onClick={() => navigate('/logout')} // Assuming you have a logout route or function
+            onClick={signOut} // Assuming you have a logout route or function
             style={{ position: "absolute", top: "10px", right: "10px" }}
           >
             Sign Out
@@ -186,3 +197,5 @@ export default function SidebarLayout() {
     </Box>
   );
 }
+
+export default withAuthenticator(SidebarLayout);

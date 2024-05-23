@@ -1,37 +1,45 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useLocation } from "react-router-dom";
+
+// Material-UI Components
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import DoneIcon from "@mui/icons-material/Done";
-import AttestDialog from "./ReusableComponents/AttestDialog";
-import * as myConstClass from "../Util/Constants";
-import ChatDialog from "./ReusableComponents/ChatDialog";
-import Breadcrumb from "./ReusableComponents/Breadcrumb";
 import Slide from "@mui/material/Slide";
-import WebllinkDialog from "./ReusableComponents/Weblinkdialog";
-import ViewResponseDialog from "./ReusableComponents/ViewResponseDialog";
 import Paper from "@mui/material/Paper";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import QuestionsTable from "./ReusableComponents/QuestionsTable";
 import DownloadIcon from "@mui/icons-material/Download";
-import { API, Storage } from "aws-amplify";
+import {
+  Box,
+  Grid,
+  Typography,
+  Button,
+  IconButton,
+  TextField,
+  FormControl,
+} from "@mui/material";
+
+// AWS Amplify
+import { API, Storage, Auth } from "aws-amplify";
+import { withAuthenticator } from "@aws-amplify/ui-react";
+
+// Utility Constants
+import * as myConstClass from "../Util/Constants";
+
+// Custom Components
+import AttestDialog from "./ReusableComponents/AttestDialog";
+import ChatDialog from "./ReusableComponents/ChatDialog";
+import Breadcrumb from "./ReusableComponents/Breadcrumb";
+import WebllinkDialog from "./ReusableComponents/Weblinkdialog";
+import ViewResponseDialog from "./ReusableComponents/ViewResponseDialog";
+import QuestionsTable from "./ReusableComponents/QuestionsTable";
 import Loading from "./ReusableComponents/Loading";
 import StatusStepper from "./ReusableComponents/StatusStepper";
-import Typography from "@mui/material/Typography";
-import { Auth } from "aws-amplify";
 import CancelDialog from "./ReusableComponents/CancelDialog";
 import CompleteDialog from "./ReusableComponents/CompleteDialog";
 import WordGenerator from "./ReusableComponents/WordGenerator";
-import { withAuthenticator } from "@aws-amplify/ui-react";
-import Sidebar from "./ReusableComponents/Sidebar";
-
-import {
-  IconButton,
-  Button,
-  Grid,
-  TextField,
-  Box
-} from "@mui/material";
 
 const myAPI = "api";
 
@@ -39,9 +47,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-
-
- function Home({ signOut }) {
+function Home({ signOut }) {
   const location = useLocation();
   const selectedRow = location.state !== null ? location.state : null;
 
@@ -52,6 +58,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     middleName: "",
     lastName: "",
     emailAddress: "",
+    selectedLawyer: "",
+    LawyersList: [],
     inpFile: "",
     inpFileName: "",
     questions: [],
@@ -88,7 +96,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
-
     if (
       location.state !== undefined &&
       location.state !== null &&
@@ -99,6 +106,9 @@ const Transition = React.forwardRef(function Transition(props, ref) {
       setState({ ...state, isLoading: true });
       let path = "/getQuestions";
       let tableData = [];
+      let menuItemList = [];
+      menuItemList.push(<MenuItem value={selectedRow.LawyerId}>{selectedRow.Lawyer}</MenuItem>);
+
       console.log(selectedRow); // output: "the-page-id"
       async function getData() {
         const formData = new FormData();
@@ -112,9 +122,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
           console.log(response);
           tableData = await response.recordsets[1];
           selectedRow = response.recordsets[0][0];
-          
         });
-
+        
         setState({
           ...state,
           questionTable: tableData,
@@ -131,21 +140,61 @@ const Transition = React.forwardRef(function Transition(props, ref) {
           status: selectedRow.Status.includes(",")
             ? myConstClass.STATUS_CANCEL
             : selectedRow.Status,
-          cancelQueue: selectedRow.Status.includes(",")
-            ? selectedRow.status
+            cancelQueue: selectedRow.Status.includes(",")
+            ? selectedRow.Status
             : "",
           emailChannelInitiated:
             selectedRow.EmailInitiated === null ? false : true,
           chatInitiatedForCase:
             selectedRow.ChatInitiated === null ? false : true,
           responseFileName: selectedRow.ResponseFileName,
+          selectedLawyer: selectedRow.LawyerId,
+          LawyersList:menuItemList
         });
       }
       getData();
+    } else {
+      getLawyersList();
     }
   }, []);
 
-  const viewResponse = async (row) => {    
+  const getLawyersList = async () => {
+    console.log("Lawyers method");
+    let menuItemList = [];
+    // menuItemList.push(
+    //   <MenuItem value="">
+    //     <em>None</em>
+    //   </MenuItem>
+    // );
+    const path = "/getLawyers";
+    const response = await API.get(
+      myAPI,
+      path + "/" + state.caseId + "-" + myConstClass.STATUS_AWAITING
+    );
+    //.then(async (response) => {
+    console.log(response);
+    const data = await response.recordsets[0];
+    console.log(data);
+    menuItemList = data.length ? (
+      data.map((x) => (
+        <MenuItem key={x.Id} value={x.Id}>
+          {x.FirstName + " " + x.LastName}
+        </MenuItem>
+      ))
+    ) : (
+      <MenuItem value="" disabled>
+        No options available
+      </MenuItem>
+    );
+
+    console.log(menuItemList);
+    setState((prevState) => ({
+      ...prevState,
+      LawyersList: menuItemList,
+    }));
+  };
+
+  const viewResponse = async (row) => {
     setState({
       ...state,
       isLoading: false,
@@ -168,7 +217,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
       "-" +
       state.caseNumber.split(" ").join("");
     console.log(process.env.FORM_LINK);
-    const body = `https://main.d1rrqzqg8fxd0a.amplifyapp.com/submit/${key}`;
+    const body = `https://main.d2juc4bptwol87.amplifyapp.com//submit/${key}`;
     console.log(body);
     const path = "/email";
     const formData = new FormData();
@@ -265,7 +314,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     });
   };
 
-  
   const handleChange = (e) => {
     let newState = { ...state };
     newState[e.target.name] = e.target.value;
@@ -342,8 +390,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     });
   };
 
-  
-
   const onSubmit = async () => {
     setState({
       ...state,
@@ -378,6 +424,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     formData.append("Status", myConstClass.STATUS_NEW);
     formData.append("loggedInuseremail", loggedInuseremail);
     formData.append("loggedinuser", loggedinuser);
+    formData.append("selectedLawyerId", state.selectedLawyer);
     console.log(formData);
     let insertObj = [];
     const result = await API.post(myAPI, path, {
@@ -565,7 +612,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   };
 
   return !state.isLoading ? (
-    <Box  sx={{ flexGrow: 1, p: 3 }}>
+    <Box sx={{ flexGrow: 1, p: 3 }}>
       {/* <Sidebar signOut={signOut} /> */}
       <ViewResponseDialog
         open={state.showResponsesDialog}
@@ -703,6 +750,29 @@ const Transition = React.forwardRef(function Transition(props, ref) {
                 }
                 style={{ width: "90%" }}
               />
+            </Grid>
+            <Grid item xs={4}>
+              <Box sx={{ minWidth: 120, marginLeft: "20px" }}>
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel id="lawyer-select-label">Lawyer</InputLabel>
+                  <Select
+                    labelId="lawyer-select-label"
+                    id="lawyerId"
+                    name="selectedLawyer"
+                    value={state.selectedLawyer}
+                    onChange={handleChange}
+                    label="Lawyer" // Ensures the label is associated with the Select component
+                    displayEmpty
+                    sx={{ width: "95%" }}
+                    disabled={
+                      !state.createCasePage ||
+                      (state.showTable && state.questionTable.length > 0)
+                    }
+                  >
+                    {state.LawyersList}
+                  </Select>
+                </FormControl>
+              </Box>
             </Grid>
             {((!state.createCasePage && state.questionTable.length > 0) ||
               state.showTable) && (
@@ -887,7 +957,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
                         state.lastName !== "" &&
                         state.phoneNumber !== "" &&
                         state.emailAddress !== "" &&
-                        state.inpFile != ""
+                        state.inpFile != "" &&
+                        state.selectedLawyer != ""
                       )
                     }
                   >
