@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import DownloadIcon from "@mui/icons-material/Download";
 
 const DocumentGenerator = (props) => {
-  const myAPI = "api747c26ec";
+  const myAPI = "api";
   const generateDocument = () => {
     let wordText = [];
     props.questionTable.forEach((element) => {

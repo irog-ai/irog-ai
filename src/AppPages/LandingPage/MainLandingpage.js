@@ -207,6 +207,24 @@ function MainLandingPage() {
             community space with resources to help you through every step of the
             way.
           </Typography>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh",
+            }}
+          >
+            <iframe
+              width="800"
+              height="450"
+              src={`https://www.youtube.com/embed/dQw4w9WgXcQ`}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="YouTube Video Player"
+            ></iframe>
+          </div>
         </Box>
 
         {/* Features Section */}
