@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import myImage from "../../Images/AppHomeImage.JPG";
+import myImage from "../../AppHomeImage.JPG";
 import "@fontsource/catamaran";
 import { useNavigate } from "react-router-dom";
 import {
