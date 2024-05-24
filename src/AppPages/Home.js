@@ -217,7 +217,7 @@ function Home({ signOut }) {
       "-" +
       state.caseNumber.split(" ").join("");
     console.log(process.env.FORM_LINK);
-    const body = `https://main.d2juc4bptwol87.amplifyapp.com//submit/${key}`;
+    const body = `https://main.d2juc4bptwol87.amplifyapp.com/submit/${key}`;
     console.log(body);
     const path = "/email";
     const formData = new FormData();
