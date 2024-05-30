@@ -188,7 +188,8 @@ function MainLandingPage() {
           </Grid>
           <Grid item xs={5}>
             <img
-              src={imageUrl}
+              //src={imageUrl}
+              src="/AppHomeImage.JPG" 
               alt="Image from public"
               style={{ width: "450px", height: "480px", marginTop: "15%" }}
             />
