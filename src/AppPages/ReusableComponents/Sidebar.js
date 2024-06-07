@@ -19,6 +19,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import AddIcon from "@mui/icons-material/Add";
 import BalanceIcon from '@mui/icons-material/Balance';
 import { Button } from "@aws-amplify/ui-react";
+import { Auth } from 'aws-amplify';
 import { Outlet, useNavigate } from "react-router-dom";
 import {
   withAuthenticator
@@ -27,6 +28,8 @@ import {
 
 
 const drawerWidth = 240;
+
+
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -75,6 +78,8 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
+
+
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
@@ -92,10 +97,19 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-function SidebarLayout({signOut}) {
+function SidebarLayout() {
   const theme = useTheme();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
+
+  const signOut = async () => {
+    try {
+      await Auth.signOut();
+      navigate('/'); // Redirect to custom logout URL
+    } catch (error) {
+      console.log('Error signing out: ', error);
+    }
+  };
 
   const itemsList = [
     {
@@ -144,7 +158,7 @@ function SidebarLayout({signOut}) {
             Welcome! to Steve's Legit Hub
           </Typography>
           <Button
-            onClick={signOut} // Assuming you have a logout route or function
+            onClick={signOut}// Assuming you have a logout route or function
             style={{ position: "absolute", top: "10px", right: "10px" }}
           >
             Sign Out

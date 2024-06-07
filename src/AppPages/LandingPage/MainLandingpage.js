@@ -66,22 +66,22 @@ function MainLandingPage() {
   //   }
   // };
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      try {
-        // Replace 'image-key' with the key of your image in the S3 bucket
+  // useEffect(() => {
+  //   const fetchImage = async () => {
+  //     try {
+  //       // Replace 'image-key' with the key of your image in the S3 bucket
 
-        const url = await Storage.get("AppHomeImage.JPG", { level: "public" });
+  //       //const url = await Storage.get("AppHomeImage.JPG", { level: "public" });
+  //       const url="";
+  //       setImageUrl(url);
+  //       console.log(url);
+  //     } catch (error) {
+  //       console.error("Error fetching image from S3", error);
+  //     }
+  //   };
 
-        setImageUrl(url);
-        console.log(url);
-      } catch (error) {
-        console.error("Error fetching image from S3", error);
-      }
-    };
-
-    fetchImage();
-  }, []);
+  //   //fetchImage();
+  // }, []);
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* Navigation Bar */}

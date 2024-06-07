@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+.custom-auth-container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0); /* Transparent background */
+}
+
+.custom-auth-card {
+  background-color: white; /* Keep the middle box visible */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}

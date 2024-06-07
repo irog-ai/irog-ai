@@ -113,7 +113,7 @@ const Layout = () => {
             color="inherit"
           >
             {user ? (
-              <p>Welcome, {user.username}</p>
+              <p>Welcome, {user.username} - Go to App</p>
             ) : (
               <p>LOGIN</p>
             )}

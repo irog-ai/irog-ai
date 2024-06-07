@@ -24,6 +24,8 @@ import {
 // AWS Amplify
 import { API, Storage, Auth } from "aws-amplify";
 import { withAuthenticator } from "@aws-amplify/ui-react";
+import AWS from 'aws-sdk';
+import config from '../aws-exports';
 
 // Utility Constants
 import * as myConstClass from "../Util/Constants";
@@ -107,7 +109,9 @@ function Home({ signOut }) {
       let path = "/getQuestions";
       let tableData = [];
       let menuItemList = [];
-      menuItemList.push(<MenuItem value={selectedRow.LawyerId}>{selectedRow.Lawyer}</MenuItem>);
+      menuItemList.push(
+        <MenuItem value={selectedRow.LawyerId}>{selectedRow.Lawyer}</MenuItem>
+      );
 
       console.log(selectedRow); // output: "the-page-id"
       async function getData() {
@@ -123,7 +127,7 @@ function Home({ signOut }) {
           tableData = await response.recordsets[1];
           selectedRow = response.recordsets[0][0];
         });
-        
+
         setState({
           ...state,
           questionTable: tableData,
@@ -140,7 +144,7 @@ function Home({ signOut }) {
           status: selectedRow.Status.includes(",")
             ? myConstClass.STATUS_CANCEL
             : selectedRow.Status,
-            cancelQueue: selectedRow.Status.includes(",")
+          cancelQueue: selectedRow.Status.includes(",")
             ? selectedRow.Status
             : "",
           emailChannelInitiated:
@@ -149,7 +153,7 @@ function Home({ signOut }) {
             selectedRow.ChatInitiated === null ? false : true,
           responseFileName: selectedRow.ResponseFileName,
           selectedLawyer: selectedRow.LawyerId,
-          LawyersList:menuItemList
+          LawyersList: menuItemList,
         });
       }
       getData();
@@ -323,8 +327,18 @@ function Home({ signOut }) {
 
   const uploadFile = async (file, filename) => {
     try {
+      // Ensure credentials are updated before uploading file
+      //const credentials = await Auth.currentCredentials();
+  
+      // AWS.config.update({
+      //   region: config.aws_project_region,
+      //   credentials: Auth.essentialCredentials(credentials),
+      // });
+  
+      // console.log("Reauthenticated. Uploading file...");
+  
+      // Upload the file after credentials are confirmed
       await Storage.put(filename, file);
-
       console.log("File uploaded successfully");
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -366,6 +380,9 @@ function Home({ signOut }) {
 
     await uploadFile(file, filename).then(async () => {
       console.log(file);
+
+      // Adding a delay to ensure the file is available in the S3 bucket
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // 2-second delay
 
       const response = await API.get(myAPI, path + "/" + filename, {
         headers: {
