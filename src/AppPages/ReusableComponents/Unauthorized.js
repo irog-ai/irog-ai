@@ -35,7 +35,7 @@ const UnauthorizedPage = () => {
           team to get the necessary permissions.
         </Text>
 
-        <Button onClick={handleGoBack}>Go to Home</Button>
+        <Button onClick={handleGoBack}>Go Back</Button>
       </Card>
     </div>
   );

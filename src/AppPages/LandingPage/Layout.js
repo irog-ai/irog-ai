@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
+import { AppBar, Toolbar, Box, Button, Menu, MenuItem, IconButton } from "@mui/material";
 import { Auth } from "aws-amplify";
+import CustomAuth from '../ReusableComponents/CustomSignin'; // Ensure the CustomAuth component is in the right path
+import AccountCircle from '@mui/icons-material/AccountCircle';
 
 const Layout = () => {
   const [scrolled, setScrolled] = useState(false);
   const [selectedButton, setSelectedButton] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  const open = Boolean(anchorEl);
 
   useEffect(() => {
-    // Set the selected button based on the current path
     const path = location.pathname.split("/")[1];
     setSelectedButton(path || "home");
 
@@ -47,6 +52,34 @@ const Layout = () => {
     } catch (error) {
       console.log("User is not signed in", error);
       return null;
+    }
+  };
+
+  const handleLoginButtonClick = () => {
+    if (user) {
+      setAnchorEl(null);
+      handleButtonClick("login", "/Landingpage");
+    } else {
+      setShowAuthDialog(true);
+    }
+  };
+  
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await Auth.signOut();
+      setUser(null);
+      setAnchorEl(null);
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out: ', error);
     }
   };
 
@@ -103,25 +136,61 @@ const Layout = () => {
           >
             CONTACT US
           </Button>
-          <Button
-            sx={{
-              border: selectedButton === "login" ? "1px solid white" : "none",
-              borderRadius: "5px",
-              margin: "15px",
-            }}
-            onClick={() => handleButtonClick("login", "/Landingpage")}
-            color="inherit"
-          >
-            {user ? (
-              <p>Welcome, {user.username} - Go to App</p>
-            ) : (
-              <p>LOGIN</p>
-            )}
-          </Button>
+          {user ? (
+            <>
+              {/* <IconButton
+                onClick={handleMenuClick}
+                color="inherit"
+                sx={{
+                  border: selectedButton === "login" ? "1px solid white" : "none",
+                  borderRadius: "5px",
+                  //margin: "15px",
+                }}
+              >
+                <AccountCircle />
+                {user.attributes.given_name + " " + user.attributes.family_name}
+              </IconButton> */}
+              <Button
+              onClick={handleMenuClick}
+              color="inherit"
+              sx={{
+                border: selectedButton === "login" ? "1px solid white" : "none",
+                borderRadius: "5px",
+                margin: "15px",
+              }}
+              startIcon={<AccountCircle />}
+            >
+              {user.attributes.given_name + " " + user.attributes.family_name}
+            </Button>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleLoginButtonClick}>Go to App</MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Button
+              sx={{
+                border: selectedButton === "login" ? "1px solid white" : "none",
+                borderRadius: "5px",
+                margin: "15px",
+              }}
+              onClick={handleLoginButtonClick}
+              color="inherit"
+            >
+              LOGIN
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
       <Toolbar />
       <Outlet />
+
+      {/* CustomAuth Dialog */}
+      <CustomAuth open={showAuthDialog} onClose={() => setShowAuthDialog(false)} />
     </Box>
   );
 };

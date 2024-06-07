@@ -1,0 +1,22 @@
+/* Basic styling for the unauthorized page */
+.unauthorized-container {
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Additional styling to make it prettier */
+  .unauthorized-container h4 {
+    color: #333;
+  }
+  
+  .unauthorized-container p {
+    margin-top: 20px;
+    color: #666;
+  }
+  
+  .unauthorized-container button {
+    margin-top: 20px;
+  }

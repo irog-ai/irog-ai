@@ -149,4 +149,4 @@ function LandingPage({ signOut }) {
   );
 }
 
-export default withAuthenticator(LandingPage);
+export default LandingPage;

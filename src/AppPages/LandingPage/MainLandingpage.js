@@ -189,7 +189,8 @@ function MainLandingPage() {
           <Grid item xs={5}>
             <img
               //src={imageUrl}
-              src="/AppHomeImage.JPG" 
+              //src={`${process.env.PUBLIC_URL}/img/AppHomeImage.JPG`}
+              src="../../AppHomeImage.JPG" 
               alt="Image from public"
               style={{ width: "450px", height: "480px", marginTop: "15%" }}
             />

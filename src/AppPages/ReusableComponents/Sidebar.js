@@ -115,7 +115,7 @@ function SidebarLayout() {
     {
       text: "Home",
       icon: <HomeIcon />,
-      onClick: () => navigate("/Landingpage"),
+      onClick: () => navigate("/"),
     },
     {
       text: "Add Case",
@@ -155,11 +155,11 @@ function SidebarLayout() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Welcome! to Steve's Legit Hub
+            Welcome! to CG Technologies
           </Typography>
           <Button
             onClick={signOut}// Assuming you have a logout route or function
-            style={{ position: "absolute", top: "10px", right: "10px" }}
+            style={{ position: "absolute", top: "10px", right: "10px", color:"white" }}
           >
             Sign Out
           </Button>
@@ -212,4 +212,4 @@ function SidebarLayout() {
   );
 }
 
-export default withAuthenticator(SidebarLayout);
+export default SidebarLayout;
