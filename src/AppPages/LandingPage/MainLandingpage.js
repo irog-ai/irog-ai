@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import myImage from "../../AppHomeImage.JPG";
+import myImage from "./AppHomeImage.JPG";
 import { Storage } from "aws-amplify";
 import "@fontsource/catamaran";
 import { useNavigate } from "react-router-dom";
