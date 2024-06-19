@@ -99,12 +99,13 @@ function LandingPage({ signOut }) {
     });
   };
 
-  return !state.isLoading ? (
+  return (
     <Box
       //style={{ marginTop: "10%" }}
       component="main"
-      sx={{ flexGrow: 1}}
+      sx={{ flexGrow: 1 }}
     >
+      {state.isLoading && <Loading />}
       <React.Fragment>
         <FilterBar
           tableData={state.tableData}
@@ -144,8 +145,6 @@ function LandingPage({ signOut }) {
         <HomePageTable rows={state.filteredTabledata} />
       </React.Fragment>
     </Box>
-  ) : (
-    <Loading />
   );
 }
 

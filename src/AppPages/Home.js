@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Material-UI Components
 import InputLabel from "@mui/material/InputLabel";
@@ -96,6 +96,7 @@ function Home({ signOut }) {
     responseFileName: "",
   };
   const [state, setState] = useState(initialState);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (
@@ -407,6 +408,10 @@ function Home({ signOut }) {
     });
   };
 
+  const canelCaseCreation = () => {
+    navigate("/Landingpage");
+  }
+
   const onSubmit = async () => {
     setState({
       ...state,
@@ -628,9 +633,10 @@ function Home({ signOut }) {
     });
   };
 
-  return !state.isLoading ? (
+  return  (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       {/* <Sidebar signOut={signOut} /> */}
+      {state.isLoading && <Loading />}
       <ViewResponseDialog
         open={state.showResponsesDialog}
         Transition={Transition}
@@ -981,6 +987,10 @@ function Home({ signOut }) {
                   >
                     Submit
                   </Button>
+                  {
+                    state.createCasePage && <Button style={{marginLeft:"10px"}}
+                     variant="text" onClick={canelCaseCreation}>Cancel</Button>
+                  }
                 </Grid>
               </React.Fragment>
             )}
@@ -1039,8 +1049,6 @@ function Home({ signOut }) {
         )}
       </React.Fragment>
     </Box>
-  ) : (
-    <Loading />
   );
 }
 

@@ -16,14 +16,14 @@ function Loading() {
       left: 0,
       width: "100%",
       height: "100%",
-      backgroundColor: "rgba(220, 220, 220, 0.7)", // adjust the background color and opacity here
+      backgroundColor: "rgba(255, 255, 255, 0.5)", // Adjust the opacity to make the background content visible
       zIndex: 6999, // set a lower z-index for the backdrop
     },
   };
+
   return (
-    <Box
-      sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-    >
+    <Box>
+      <div style={styles.backdrop} />
       <div style={styles.container}>
         <CircularProgress />
       </div>
@@ -31,4 +31,4 @@ function Loading() {
   );
 }
 
-export default Loading;
+export default Loading

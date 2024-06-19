@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { Storage } from 'aws-amplify';
 import myImage from "./AppHomeImage.JPG";
-import { Storage } from "aws-amplify";
+//import { StorageImage } from '@aws-amplify/ui-react-storage';
+
+
 import "@fontsource/catamaran";
-import { useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -39,7 +41,7 @@ const sectionStyle = {
 };
 
 function MainLandingPage() {
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState('');
   // const [scrolled, setScrolled] = useState(false);
   // const [selectedButton, setSelectedButton] = useState("home");
   // const navigate = useNavigate();
@@ -66,22 +68,18 @@ function MainLandingPage() {
   //   }
   // };
 
-  // useEffect(() => {
-  //   const fetchImage = async () => {
-  //     try {
-  //       // Replace 'image-key' with the key of your image in the S3 bucket
+  useEffect(() => {
+    const fetchImage = async () => {
+      try {
+        const url = await Storage.get('AppHomeImage.JPG', { level: 'public' });
+        setImageUrl(url);
+      } catch (error) {
+        console.error('Error fetching image from S3', error);
+      }
+    };
 
-  //       //const url = await Storage.get("AppHomeImage.JPG", { level: "public" });
-  //       const url="";
-  //       setImageUrl(url);
-  //       console.log(url);
-  //     } catch (error) {
-  //       console.error("Error fetching image from S3", error);
-  //     }
-  //   };
-
-  //   //fetchImage();
-  // }, []);
+    fetchImage();
+  }, []);
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* Navigation Bar */}
@@ -186,14 +184,16 @@ function MainLandingPage() {
               </Typography>
             </div>
           </Grid>
+          {/* src={`${process.env.PUBLIC_URL}/AppHomeImage.JPG`}
+              //src={myImage} */}
           <Grid item xs={5}>
             <img
-              //src={imageUrl}
-              //src={`${process.env.PUBLIC_URL}/img/AppHomeImage.JPG`}
-              src={myImage}
+              src={myImage}              
               alt="Image from public"
               style={{ width: "450px", height: "480px", marginTop: "15%" }}
             />
+            
+             
           </Grid>
         </Grid>
       </Banner>
