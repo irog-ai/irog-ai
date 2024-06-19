@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Storage } from 'aws-amplify';
-import myImage from "./AppHomeImage.JPG";
+import myImage from "./AppHomeImageNoBG.png";
 //import { StorageImage } from '@aws-amplify/ui-react-storage';
 
 
