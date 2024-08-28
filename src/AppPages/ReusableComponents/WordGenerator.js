@@ -10,13 +10,15 @@ const DocumentGenerator = (props) => {
     props.questionTable.forEach((element) => {
       wordText.push(
         new Paragraph({
-          text: "Question " + element.SequenceNumber,
+          text: "Interrogatory " + element.SequenceNumber,
           heading: HeadingLevel.HEADING_1,
         })
       );
       wordText.push(
         new Paragraph({
-          text: "Question " + element.StandardQuestion,
+          text: props.isAttorneyDoc
+            ? element.OriginalQuestion
+            : element.StandardQuestion,
         })
       );
       wordText.push(
@@ -27,11 +29,21 @@ const DocumentGenerator = (props) => {
       );
       wordText.push(
         new Paragraph({
-          text: element.StandardAnswer,
+          text: props.isAttorneyDoc
+            ? element.OriginalAnswer
+            : element.StandardAnswer,
         })
       );
     });
-    if (props.responseFileName === "" || props.responseFileName === null) {
+    if (props.isAttorneyDoc) {
+      createFile(wordText, props.responseFileName);
+    } else {
+      createFile(wordText, props.responseFileName);
+    }
+  };
+
+  const createFile = (wordText, file) => {
+    if (file === "" || file === null) {
       props.changeIsLoading();
       let path = "/updateResponsePdf";
       const doc = new Document({
@@ -41,17 +53,19 @@ const DocumentGenerator = (props) => {
           },
         ],
       });
-      const filename = Date.now() + "-" + props.caseid;
+      const filename = props.isAttorneyDoc
+        ? "Attorney" + Date.now() + "-" + props.caseid
+        : "" + Date.now() + "-" + props.caseid;
       Packer.toBlob(doc).then((blob) => {
         // Upload the blob to AWS S3
         uploadToS3(blob, filename);
       });
       API.get(myAPI, path + "/" + filename).then(() => {
-        props.handleDownload(filename, true);
+        props.handleDownload(filename, true, props.isAttorneyDoc);
       });
       props.changeIsLoading();
     } else {
-      props.handleDownload(props.responseFileName, false);
+      props.handleDownload(file, false, props.isAttorneyDoc);
     }
   };
 
@@ -70,8 +84,14 @@ const DocumentGenerator = (props) => {
   };
 
   return (
-    <Button startIcon={<DownloadIcon />} onClick={generateDocument} variant="outlined" style={{ marginLeft: "20px" }}>
-      Responses
+    <Button
+      startIcon={<DownloadIcon />}
+      onClick={generateDocument}
+      variant="outlined"
+      style={{ marginLeft: "20px" }}
+    >
+      
+      {props.isAttorneyDoc ? "Attorney Responses" : "Client Responses"}
     </Button>
     // <button onClick={generateDocument}>Generate .docx and Upload to S3</button>
   );

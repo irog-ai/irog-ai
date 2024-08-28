@@ -38,8 +38,8 @@ exports.handler =async (event) => {
         request.input("caseId", sql.NVarChar, id);  
       
         const selectQuery =`select * from cases where id=@caseId;
-        select q.Id, q.SequenceNumber,q.MsgSentDateTime,  q.CaseId, q.MsgSent, q.MsgReceived, q.OriginalQuestion 
-        ,q.StandardQuestion,0 as IsModified,r.PiiInfo as PiiInfo,r.HasPiiInfo,  r.StandardAnswer, r.OriginalAnswer from questions q 
+        select q.Id, q.SequenceNumber,q.OriginalSequenceNumber as OriginalSequenceNumber, q.MsgSentDateTime,  q.CaseId, q.MsgSent, q.MsgReceived, q.OriginalQuestion 
+        ,q.StandardQuestion,0 as IsModified,r.PiiInfo as PiiInfo,r.HasPiiInfo,  r.StandardAnswer, r.OriginalAnswer, q.IsActive as IsQuestionActive from questions q 
                 left outer join Webresponses r on q.Id = r.QuestionId and r.IsActive=1
                 where q.CaseId=@caseId order by q.SequenceNumber asc`;
         request.query(selectQuery, (err, result) => {

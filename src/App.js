@@ -62,7 +62,7 @@ function App() {
           <Route path="/Unauthorized" element={<UnauthorizedPage />}/>
         </Route>
         
-        <Route exact path="/Submit/:key" element={<Submit />} />
+        
       </Routes>
     </div>
   );

@@ -12,16 +12,15 @@ export default function AttestDialog(props) {
   return (
     <React.Fragment>
       <Dialog open={props.open} onClose={props.handleClose}>
-        <DialogTitle>Attestation</DialogTitle>
+        <DialogTitle>Select Confirmation</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Attest that all questions are accurate, up to date and have full
-            meaning of all acronyms and sentences.
+          Please confirm that you have selected the interrogatories you want your client to respond to before proceeding as of:
           </DialogContentText>
-          <DialogContentText>
-            Yes I attest all the questions in portal is accurate and update to
+          {/* <DialogContentText>
+            Yes I attest all the interrogatories have been selected correctl
             date as of:
-          </DialogContentText>
+          </DialogContentText> */}
 
           <TextField
             autoFocus
@@ -37,7 +36,7 @@ export default function AttestDialog(props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={props.handleClose}>Cancel</Button>
-          <Button onClick={props.handleAttestation}>Attest</Button>
+          <Button onClick={props.handleAttestation}>Continue</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>

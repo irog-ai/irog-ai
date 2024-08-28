@@ -63,6 +63,8 @@ exports.handler = async (event) => {
         nullable: false,
       });
       table.columns.add("SequenceNumber", sql.Int, { nullable: true });
+      table.columns.add("OriginalSequenceNumber", sql.Int, { nullable: true });
+      table.columns.add("IsActive", sql.Bit, { nullable: true });
       let validstring = formdata.insertObj.replace(/\\n/g, "\n")
       .replace(/\\r/g, "\r")
       .replace(/\\t/g, "\t")
@@ -77,7 +79,7 @@ exports.handler = async (event) => {
       console.log("1");          
       for (let j = 0; j < values.length; j += 1) {
         //console.log("2");
-        table.rows.add(values[j][0].toString(), values[j][1], values[j][2]);
+        table.rows.add(values[j][0].toString(), values[j][1], values[j][2], values[j][2], 1);
       }
   
       console.log(table.rows);

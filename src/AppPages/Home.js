@@ -19,13 +19,14 @@ import {
   IconButton,
   TextField,
   FormControl,
+  Checkbox,
 } from "@mui/material";
 
 // AWS Amplify
 import { API, Storage, Auth } from "aws-amplify";
 import { withAuthenticator } from "@aws-amplify/ui-react";
-import AWS from 'aws-sdk';
-import config from '../aws-exports';
+import AWS from "aws-sdk";
+import config from "../aws-exports";
 
 // Utility Constants
 import * as myConstClass from "../Util/Constants";
@@ -94,6 +95,7 @@ function Home({ signOut }) {
     completeConfirmation: false,
     showChatDiaolog: false,
     responseFileName: "",
+    responseAttorneyFileName:""
   };
   const [state, setState] = useState(initialState);
   const navigate = useNavigate();
@@ -153,6 +155,7 @@ function Home({ signOut }) {
           chatInitiatedForCase:
             selectedRow.ChatInitiated === null ? false : true,
           responseFileName: selectedRow.ResponseFileName,
+          responseAttorneyFileName: selectedRow.ResponseAttorneyFileName,
           selectedLawyer: selectedRow.LawyerId,
           LawyersList: menuItemList,
         });
@@ -328,17 +331,6 @@ function Home({ signOut }) {
 
   const uploadFile = async (file, filename) => {
     try {
-      // Ensure credentials are updated before uploading file
-      //const credentials = await Auth.currentCredentials();
-  
-      // AWS.config.update({
-      //   region: config.aws_project_region,
-      //   credentials: Auth.essentialCredentials(credentials),
-      // });
-  
-      // console.log("Reauthenticated. Uploading file...");
-  
-      // Upload the file after credentials are confirmed
       await Storage.put(filename, file);
       console.log("File uploaded successfully");
     } catch (error) {
@@ -356,11 +348,17 @@ function Home({ signOut }) {
     }
   };
 
-  const handleDownload = async (filename, updateState) => {
+  const handleDownload = async (filename, updateState, isAttorneyDoc) => {
     try {
       const response = await Storage.get(filename);
       console.log(response);
-      if (updateState) setState({ ...state, responseFileName: filename });
+      if (updateState) {
+        if (isAttorneyDoc) {
+          setState({ ...state, responseAttorneyFileName: filename });
+        } else {
+          setState({ ...state, responseFileName: filename });
+        }
+      }
       window.open(response); // Open the file URL in a new tab for download
     } catch (error) {
       console.error("Error downloading file", error);
@@ -383,7 +381,7 @@ function Home({ signOut }) {
       console.log(file);
 
       // Adding a delay to ensure the file is available in the S3 bucket
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // 2-second delay
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2-second delay
 
       const response = await API.get(myAPI, path + "/" + filename, {
         headers: {
@@ -410,7 +408,7 @@ function Home({ signOut }) {
 
   const canelCaseCreation = () => {
     navigate("/Landingpage");
-  }
+  };
 
   const onSubmit = async () => {
     setState({
@@ -503,6 +501,15 @@ function Home({ signOut }) {
     });
   };
 
+  const handleCheckboxChange = (value, changedRow) => {
+    let tempTabledata = [...state.questionTable];
+    const row = tempTabledata.find(
+      (row) => row.SequenceNumber === changedRow.SequenceNumber
+    );
+    row.IsQuestionActive = value;
+    setState({ ...state, questionTable: tempTabledata });
+  };
+
   const handleAttestation = async () => {
     setState({ ...state, isLoading: true });
     const path = "/caseStatusUpdate";
@@ -511,7 +518,10 @@ function Home({ signOut }) {
       path + "/" + state.caseId + "-" + myConstClass.STATUS_ATTESTED
     ).then(async (response) => {
       console.log(response);
-      const result = await response;
+      const path1 = "/updateQuestions";
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(state.questionTable));
+      await API.post(myAPI, path1, { body: formData }).then(() => {});
     });
     setState({
       ...state,
@@ -633,7 +643,7 @@ function Home({ signOut }) {
     });
   };
 
-  return  (
+  return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       {/* <Sidebar signOut={signOut} /> */}
       {state.isLoading && <Loading />}
@@ -828,8 +838,8 @@ function Home({ signOut }) {
                       }
                     >
                       {state.status === myConstClass.STATUS_NEW
-                        ? "Attest"
-                        : "Attested"}
+                        ? "Select Questions"
+                        : "Questions Selected"}
                     </Button>
                   )}
                   {((!state.createCasePage && state.questionTable.length > 0) ||
@@ -854,8 +864,8 @@ function Home({ signOut }) {
                       }
                     >
                       {!state.chatInitiatedForCase
-                        ? "Initiate Chat"
-                        : "Chat Initiated"}
+                        ? "Send by text"
+                        : "Text Sent"}
                     </Button>
                   )}
 
@@ -879,7 +889,7 @@ function Home({ signOut }) {
                       }
                     >
                       {!state.emailChannelInitiated
-                        ? "Send WebLink"
+                        ? "Send by WebLink"
                         : "Re-send Weblink"}
                     </Button>
                   )}
@@ -905,7 +915,9 @@ function Home({ signOut }) {
                       onClick={completeDialog}
                       disabled={
                         state.questionTable.filter(
-                          (x) => x.OriginalAnswer === null
+                          (x) =>
+                            x.OriginalAnswer === null &&
+                            x.IsQuestionActive === true
                         ).length > 0 ||
                         state.status === myConstClass.STATUS_CANCEL ||
                         state.status === myConstClass.STAUS_COMPLETE
@@ -987,10 +999,15 @@ function Home({ signOut }) {
                   >
                     Submit
                   </Button>
-                  {
-                    state.createCasePage && <Button style={{marginLeft:"10px"}}
-                     variant="text" onClick={canelCaseCreation}>Cancel</Button>
-                  }
+                  {state.createCasePage && (
+                    <Button
+                      style={{ marginLeft: "10px" }}
+                      variant="text"
+                      onClick={canelCaseCreation}
+                    >
+                      Cancel
+                    </Button>
+                  )}
                 </Grid>
               </React.Fragment>
             )}
@@ -1001,22 +1018,22 @@ function Home({ signOut }) {
           state.showTable) && (
           <React.Fragment>
             <Grid container alignItems="center" style={{ marginTop: "20px" }}>
-              <Grid item xs={6}>
+              <Grid item xs={5}>
                 <Typography variant="h6" gutterBottom>
-                  Question List{" "}
+                  Irog List{" "}
                 </Typography>
               </Grid>
               <Grid
                 item
-                xs={6}
+                xs={7}
                 style={{ display: "flex", justifyContent: "flex-end" }}
               >
                 {state.questionTable.length > 0 && (
                   <Button
-                    style={{ marginLeft: "20px" }}
+                    
                     variant="outlined"
                     onClick={() =>
-                      handleDownload(state.s3bucketfileName, false)
+                      handleDownload(state.s3bucketfileName, false, false)
                     }
                     startIcon={<DownloadIcon />}
                   >
@@ -1030,6 +1047,18 @@ function Home({ signOut }) {
                     responseFileName={state.responseFileName}
                     questionTable={state.questionTable}
                     changeIsLoading={changeIsLoading}
+                    isAttorneyDoc={false}
+                  />
+                )}
+
+                {state.status === myConstClass.STAUS_COMPLETE && (
+                  <WordGenerator
+                    caseid={state.caseId}
+                    handleDownload={handleDownload}
+                    responseFileName={state.responseAttorneyFileName}
+                    questionTable={state.questionTable}
+                    changeIsLoading={changeIsLoading}
+                    isAttorneyDoc={true}
                   />
                 )}
                 <IconButton variant="contained" onClick={refresh}>
@@ -1042,6 +1071,8 @@ function Home({ signOut }) {
                   rows={state.questionTable}
                   viewResponse={viewResponse}
                   emailChannelInitiated={state.emailChannelInitiated}
+                  status={state.status}
+                  handleCheckboxChange={handleCheckboxChange}
                 />
               </Grid>
             </Grid>

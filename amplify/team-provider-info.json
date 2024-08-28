@@ -30,7 +30,7 @@
         },
         "Chatgptcall": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/Chatgptcall-4533484d356e3733555a-build.zip",
+          "s3Key": "amplify-builds/Chatgptcall-426a674b5a746b673170-build.zip",
           "secretsPathAmplifyAppId": "d8fil6fk6i7h6",
           "chatgptPrompt": "Convert this question into layman language:",
           "chatgptPromptAnswer": "Rephrase the below senetence into attorney language:"
@@ -49,7 +49,7 @@
         },
         "getQuestions": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/getQuestions-4966685a5a6946764f71-build.zip"
+          "s3Key": "amplify-builds/getQuestions-35594b6d49726d535a6a-build.zip"
         },
         "getResponses": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
@@ -61,7 +61,7 @@
         },
         "insertquestions": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/insertquestions-5a67357a484941376756-build.zip"
+          "s3Key": "amplify-builds/insertquestions-77457649302f6f474377-build.zip"
         },
         "sms": {
           "secretsPathAmplifyAppId": "d8fil6fk6i7h6",
@@ -74,11 +74,11 @@
         },
         "updateQuestions": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/updateQuestions-705869387169666e4a4d-build.zip"
+          "s3Key": "amplify-builds/updateQuestions-4652553262524c625047-build.zip"
         },
         "updateResponsePdf": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/updateResponsePdf-7a35723561786f744572-build.zip"
+          "s3Key": "amplify-builds/updateResponsePdf-4a6164652f6e562b4965-build.zip"
         },
         "getLawyers": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",

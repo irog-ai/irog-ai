@@ -2,7 +2,9 @@ const aws = require("aws-sdk");
 
 exports.handler = async (event) => {
   console.log(`EVENT: ${JSON.stringify(event)}`);
-  const input = Buffer.from(event.body, "base64").toString("ascii");
+  let input= event.body;
+  if(!event.body.indexOf("WebKitFormBoundary")>0)
+    input = Buffer.from(event.body, "base64").toString("ascii");
   const boundaryRegex = /^--([^\r\n]+)/;
   const boundaryMatch = input.match(boundaryRegex);
   const boundary = boundaryMatch ? boundaryMatch[1] : null;
@@ -27,14 +29,7 @@ exports.handler = async (event) => {
 
     console.log(formdata);
   }
-//   const { Parameters } = await new aws.SSM()
-//     .getParameters({
-//       Names: ["DB_USERNAME", "DB_PASS"].map(
-//         (secretName) => process.env[secretName]
-//       ),
-//       WithDecryption: true,
-//     })
-//     .promise();
+
 
   const promise = new Promise((resolve, reject) => {
     let sql = require("mssql");
@@ -57,23 +52,23 @@ exports.handler = async (event) => {
       // Define the table and column names
       const tableName = "questions";
       const idColumnName = "Id";
-      const nameColumnName = "StandardAnswer";
+      const nameColumnName = "IsActive";
       let tabledata = JSON.parse(formdata.data);
       //const request = new sql.Request();
 
       // Generate bulk update query
       let query = `UPDATE ${tableName} SET ${nameColumnName} = CASE `;
       let params = [];
-      console.log(tabledata.filter((row) => row.StandardAnswerWeb !== null));
+      //console.log(tabledata.filter((row) => row.StandardAnswerWeb !== null));
       const filteredTableData = tabledata.filter(
-        (row) => row.StandardAnswerWeb !== null
+        (row) => row.IsQuestionActive === false
       );
-
+      console.log(filteredTableData);
       filteredTableData.forEach((row) => {
-        console.log(row.StandardAnswerWeb);
+        //console.log(row.StandardAnswerWeb);
         query += `WHEN ${idColumnName} = @id${row.Id} THEN @name${row.Id} `;
         request.input(`id${row.Id}`, sql.Int, row.Id);
-        request.input(`name${row.Id}`, sql.NVarChar, row.StandardAnswerWeb);
+        request.input(`name${row.Id}`, sql.Bit, row.IsQuestionActive);
       });
       query += `END WHERE ${idColumnName} IN (`;
       query += filteredTableData.map((row) => `@id${row.Id}`)

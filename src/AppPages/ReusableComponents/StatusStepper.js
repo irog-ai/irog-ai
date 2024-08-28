@@ -34,12 +34,24 @@ export default function StatusStepper(props) {
     }
   }
 
+  const getLabel = (label) => {
+    console.log(label);
+    switch(label){
+      case myConstClass.STATUS_AWAITING:
+        return "QUESTIONS SENT";
+      case myConstClass.STATUS_ATTESTED:
+        return "QUESTIONS SELECTED";
+      default:
+        return label;
+    }
+  }
+
   return (
     <Box sx={{ width: "100%" }}>
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>
-            <StepLabel>{label}</StepLabel>
+            <StepLabel>{getLabel(label)}</StepLabel>
           </Step>
         ))}
       </Stepper>

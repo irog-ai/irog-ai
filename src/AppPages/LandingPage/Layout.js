@@ -1,19 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Box, Button, Menu, MenuItem, IconButton } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  IconButton,
+} from "@mui/material";
 import { Auth } from "aws-amplify";
-import CustomAuth from '../ReusableComponents/CustomSignin'; // Ensure the CustomAuth component is in the right path
-import AccountCircle from '@mui/icons-material/AccountCircle';
+import CustomAuth from "../ReusableComponents/CustomSignin"; // Ensure the CustomAuth component is in the right path
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import logo from "./irog-logo1.png";
 
 const Layout = () => {
   const [scrolled, setScrolled] = useState(false);
   const [selectedButton, setSelectedButton] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const open = Boolean(anchorEl);
 
   useEffect(() => {
@@ -45,9 +55,26 @@ const Layout = () => {
     navigate(route);
   };
 
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
+  const imgStyle = {
+    width: "150px",
+    height: "30px",
+    marginLeft: "10px",
+    filter: isHovered ? "brightness(0.8)" : "brightness(1)",
+    transition: "filter 0.3s",
+  };
+
   const checkUserSession = async () => {
     try {
       const user = await Auth.currentAuthenticatedUser();
+      console.log(user);
       return user;
     } catch (error) {
       console.log("User is not signed in", error);
@@ -63,7 +90,7 @@ const Layout = () => {
       setShowAuthDialog(true);
     }
   };
-  
+
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -77,9 +104,9 @@ const Layout = () => {
       await Auth.signOut();
       setUser(null);
       setAnchorEl(null);
-      navigate('/');
+      navigate("/");
     } catch (error) {
-      console.error('Error logging out: ', error);
+      console.error("Error logging out: ", error);
     }
   };
 
@@ -99,7 +126,13 @@ const Layout = () => {
             style={{ color: "white", fontSize: "large" }}
             onClick={() => handleButtonClick("home", "/")}
           >
-            CG TECHNOLOGIES
+            <img
+              src={logo}
+              alt="Image from public"
+              style={imgStyle}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            />
           </Button>
           <Box sx={{ flexGrow: 1 }} />
           <Button
@@ -107,6 +140,10 @@ const Layout = () => {
               border: selectedButton === "home" ? "1px solid white" : "none",
               borderRadius: "5px",
               margin: "15px",
+              transition: "filter 0.3s", // Smooth transition for the hover effect
+              "&:hover": {
+                filter: "brightness(0.8)",
+              },
             }}
             onClick={() => handleButtonClick("home", "/")}
             color="inherit"
@@ -118,6 +155,10 @@ const Layout = () => {
               border: selectedButton === "faq" ? "1px solid white" : "none",
               borderRadius: "5px",
               margin: "15px",
+              transition: "filter 0.3s", // Smooth transition for the hover effect
+              "&:hover": {
+                filter: "brightness(0.8)",
+              },
             }}
             onClick={() => handleButtonClick("faq", "/Faq")}
             color="inherit"
@@ -130,6 +171,10 @@ const Layout = () => {
                 selectedButton === "contactus" ? "1px solid white" : "none",
               borderRadius: "5px",
               margin: "15px",
+              transition: "filter 0.3s", // Smooth transition for the hover effect
+              "&:hover": {
+                filter: "brightness(0.8)",
+              },
             }}
             onClick={() => handleButtonClick("contactus", "/Contactus")}
             color="inherit"
@@ -151,23 +196,24 @@ const Layout = () => {
                 {user.attributes.given_name + " " + user.attributes.family_name}
               </IconButton> */}
               <Button
-              onClick={handleMenuClick}
-              color="inherit"
-              sx={{
-                border: selectedButton === "login" ? "1px solid white" : "none",
-                borderRadius: "5px",
-                margin: "15px",
-              }}
-              startIcon={<AccountCircle />}
-            >
-              {user.attributes.given_name + " " + user.attributes.family_name}
-            </Button>
-              <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleMenuClose}
+                onClick={handleMenuClick}
+                color="inherit"
+                sx={{
+                  border:
+                    selectedButton === "login" ? "1px solid white" : "none",
+                  borderRadius: "5px",
+                  margin: "15px",
+                  transition: "filter 0.3s", // Smooth transition for the hover effect
+                  "&:hover": {
+                    filter: "brightness(0.8)",
+                  },
+                }}
+                startIcon={<AccountCircle />}
               >
-                <MenuItem onClick={handleLoginButtonClick}>Go to App</MenuItem>
+                {user.attributes.given_name + " " + user.attributes.family_name}
+              </Button>
+              <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
+                <MenuItem onClick={handleLoginButtonClick}>Dashboard</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </>
@@ -190,7 +236,10 @@ const Layout = () => {
       <Outlet />
 
       {/* CustomAuth Dialog */}
-      <CustomAuth open={showAuthDialog} onClose={() => setShowAuthDialog(false)} />
+      <CustomAuth
+        open={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+      />
     </Box>
   );
 };

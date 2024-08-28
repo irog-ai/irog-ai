@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Storage } from 'aws-amplify';
+import { Storage } from "aws-amplify";
 import myImage from "./AppHomeImageNoBG.png";
-//import { StorageImage } from '@aws-amplify/ui-react-storage';
 
+//import { StorageImage } from '@aws-amplify/ui-react-storage';
 
 import "@fontsource/catamaran";
 import {
@@ -41,7 +41,7 @@ const sectionStyle = {
 };
 
 function MainLandingPage() {
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState("");
   // const [scrolled, setScrolled] = useState(false);
   // const [selectedButton, setSelectedButton] = useState("home");
   // const navigate = useNavigate();
@@ -68,18 +68,18 @@ function MainLandingPage() {
   //   }
   // };
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      try {
-        const url = await Storage.get('AppHomeImage.JPG', { level: 'public' });
-        setImageUrl(url);
-      } catch (error) {
-        console.error('Error fetching image from S3', error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchImage = async () => {
+  //     try {
+  //       const url = await Storage.get('AppHomeImage.JPG', { level: 'public' });
+  //       setImageUrl(url);
+  //     } catch (error) {
+  //       console.error('Error fetching image from S3', error);
+  //     }
+  //   };
 
-    fetchImage();
-  }, []);
+  //   fetchImage();
+  // }, []);
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* Navigation Bar */}
@@ -152,10 +152,19 @@ function MainLandingPage() {
       <Banner>
         {/* <Typography variant="h3">Welcome to CG LLC TECHNOLOGIES</Typography> */}
         <Grid container spacing={2}>
-          <Grid item xs={7}>
-            <div style={{ margin: "15%", fontFamily: "Catamaran !important" }}>
-              <Typography variant="h2">
-                Revolutionizing Your Questionnaire Experience!!{" "}
+          <Grid item xs={6}>
+            <div style={{ margin: "3% 15% 15% 10%" }}>
+              <Typography
+                variant="h2"
+                style={{
+                  lineHeight: 1,
+                  fontFamily: "Poppins, sans-serif",
+                  fontStyle: "bold",
+                  fontWeight: 600,
+                  fontSize:70
+                }}
+              >
+                Revolutionizing Your Irog Workflow!!{" "}
               </Typography>
               <Typography
                 variant="h6"
@@ -186,14 +195,12 @@ function MainLandingPage() {
           </Grid>
           {/* src={`${process.env.PUBLIC_URL}/AppHomeImage.JPG`}
               //src={myImage} */}
-          <Grid item xs={5}>
+          <Grid item xs={6}>
             <img
-              src={myImage}              
+              src={myImage}
               alt="Image from public"
-              style={{ width: "450px", height: "480px", marginTop: "15%" }}
+              style={{ width: "520px", height: "480px" }}
             />
-            
-             
           </Grid>
         </Grid>
       </Banner>
@@ -232,7 +239,7 @@ function MainLandingPage() {
         {/* Features Section */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
-            <Box sx={{ ...sectionStyle }}>
+            {/* <Box sx={{ ...sectionStyle }}>
               <Typography variant="h5" gutterBottom>
                 Community & Support
               </Typography>
@@ -240,10 +247,10 @@ function MainLandingPage() {
                 Connect with others who are on a similar journey. Share stories,
                 provide support, and build friendships.
               </Typography>
-            </Box>
+            </Box> */}
           </Grid>
           <Grid item xs={12} md={6}>
-            <Box sx={{ ...sectionStyle }}>
+            {/* <Box sx={{ ...sectionStyle }}>
               <Typography variant="h5" gutterBottom>
                 Resources
               </Typography>
@@ -251,7 +258,7 @@ function MainLandingPage() {
                 Access blogs, podcasts, and articles written by experts. Get the
                 support and information you need.
               </Typography>
-            </Box>
+            </Box> */}
           </Grid>
         </Grid>
       </Container>

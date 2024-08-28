@@ -31,8 +31,8 @@ function CustomSignin({ open, onClose }) {
   const handleSignInSubmit = async (event) => {
     event.preventDefault();
     try {
-      await Auth.signIn(username, password);
-      navigate('/Landingpage');
+      await Auth.signIn(username, password).then(()=>{navigate('/Landingpage');});
+      
       onClose();
     } catch (error) {
       console.error('Error signing in', error);
@@ -41,11 +41,12 @@ function CustomSignin({ open, onClose }) {
 
   const handleSignUpSubmit = async (event) => {
     event.preventDefault();
+    console.log(signupusername);
     if (signUpStage === 0) {
       try {
         await Auth.signUp({
-          signupusername,
-          signuppassword,
+          username:signupusername,
+          password:signuppassword,
           attributes: {
             email: email,
             given_name: firstName,
@@ -58,8 +59,8 @@ function CustomSignin({ open, onClose }) {
       }
     } else if (signUpStage === 1) {
       try {
-        await Auth.confirmSignUp(username, code);
-        await Auth.signIn(username, password);
+        await Auth.confirmSignUp(signupusername, code);
+        await Auth.signIn(signupusername, password);
         navigate('/Landingpage');
         onClose();
       } catch (error) {

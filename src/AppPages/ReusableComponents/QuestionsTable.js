@@ -2,6 +2,7 @@ import * as React from "react";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
+import Checkbox from "@mui/material/Checkbox";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
@@ -11,7 +12,8 @@ import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import WarningIcon from "@mui/icons-material/Warning";
 import TableRow from "@mui/material/TableRow";
 import { styled } from "@mui/material/styles";
-import MessageIcon from '@mui/icons-material/Message';
+import MessageIcon from "@mui/icons-material/Message";
+import * as myConstClass from "../../Util/Constants";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -25,31 +27,54 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 export default function QuestionsTable(props) {
   const columns = [
+    {
+      id: "IsActive",
+      label: "",
+      width: "3%",
+      align: "center",
+      format: (row) => {
+        return (
+          <Checkbox
+            checked={row.IsQuestionActive}
+            disabled={props.status !== myConstClass.STATUS_NEW}
+            onChange={(e) => props.handleCheckboxChange(e.target.checked, row)}
+          />
+        );
+      },
+    },
     { id: "SequenceNumber", label: "S.No", width: "3%" },
     {
       id: "OriginalQuestion",
-      label: "Original Question",
+      label: "Original Interrogatory",
       width: "20%",
     },
     {
       id: "StandardQuestion",
-      label: "Standard Question",
+      label: "Client Facing Question",
       width: "20%",
     },
     {
       id: "MessageSent",
       label: "Msg Sent",
       minWidth: "120px",
-      align: 'center',
+      align: "center",
       format: (row) => {
         return (
           <React.Fragment>
             {props.emailChannelInitiated && (
-            <MarkEmailReadIcon fontSize="small" style={{color:"green"}}></MarkEmailReadIcon>)}
+              <MarkEmailReadIcon
+                fontSize="small"
+                style={{ color: "green" }}
+              ></MarkEmailReadIcon>
+            )}
             {row.MsgSent && (
-              <div style={{margingLeft:"10px !important"}}>
-            <MessageIcon fontSize="small" style={{color:"green"}}></MessageIcon>
-            </div>)}
+              <div style={{ margingLeft: "10px !important" }}>
+                <MessageIcon
+                  fontSize="small"
+                  style={{ color: "green" }}
+                ></MessageIcon>
+              </div>
+            )}
           </React.Fragment>
         );
       },
@@ -59,7 +84,11 @@ export default function QuestionsTable(props) {
       label: "PII",
       //minWidth: 60,
       format: (row) => {
-        return row.HasPiiInfo === 1 && <WarningIcon fontSize="small" style={{color:"#FFA500"}} />;
+        return (
+          row.HasPiiInfo === 1 && (
+            <WarningIcon fontSize="small" style={{ color: "#FFA500" }} />
+          )
+        );
       },
     },
     {
@@ -68,7 +97,8 @@ export default function QuestionsTable(props) {
       //minWidth: 80,
       format: (row) => {
         return (
-          row.StandardAnswer !== null && row.StandardAnswer !== undefined && 
+          row.StandardAnswer !== null &&
+          row.StandardAnswer !== undefined &&
           row.StandardAnswer.length > 0 && (
             <React.Fragment>
               <Button variant="text" onClick={() => props.viewResponse(row)}>

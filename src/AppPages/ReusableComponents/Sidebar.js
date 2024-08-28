@@ -155,7 +155,7 @@ function SidebarLayout() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Welcome! to CG Technologies
+            Welcome! to Irog.ai
           </Typography>
           <Button
             onClick={signOut}// Assuming you have a logout route or function
