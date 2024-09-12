@@ -61,13 +61,13 @@ export default function QuestionsTable(props) {
       format: (row) => {
         return (
           <React.Fragment>
-            {props.emailChannelInitiated && (
+            {props.emailChannelInitiated && row.IsQuestionActive && (
               <MarkEmailReadIcon
                 fontSize="small"
                 style={{ color: "green" }}
               ></MarkEmailReadIcon>
             )}
-            {row.MsgSent && (
+            {(row.MsgSent && row.IsQuestionActive) && (
               <div style={{ margingLeft: "10px !important" }}>
                 <MessageIcon
                   fontSize="small"
