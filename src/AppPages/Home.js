@@ -11,6 +11,8 @@ import Slide from "@mui/material/Slide";
 import Paper from "@mui/material/Paper";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import DownloadIcon from "@mui/icons-material/Download";
+import ViewQuestions from "./ReusableComponents/ViewQuestionsFromFile";
+import SubmitForm from "./ReusableComponents/SubmitForm";
 import {
   Box,
   Grid,
@@ -64,6 +66,9 @@ function Home({ signOut }) {
     selectedLawyer: "",
     LawyersList: [],
     inpFile: "",
+    serviceFile: "",
+    serviceFileName: "",
+    s3BucketServiceFileName: "",
     inpFileName: "",
     questions: [],
     isLoading: false,
@@ -73,6 +78,7 @@ function Home({ signOut }) {
     showTable: false,
     insertedId: 0,
     createCasePage: true,
+    openViewQuestions: false,
     questionTable: [],
     chatInitiatedForCase: false,
     caseId: "",
@@ -95,7 +101,7 @@ function Home({ signOut }) {
     completeConfirmation: false,
     showChatDiaolog: false,
     responseFileName: "",
-    responseAttorneyFileName:""
+    responseAttorneyFileName: "",
   };
   const [state, setState] = useState(initialState);
   const navigate = useNavigate();
@@ -365,6 +371,39 @@ function Home({ signOut }) {
     }
   };
 
+  const handleServiceFileChange = async (event) => {
+    if (state.serviceFile !== "") {
+      deleteFile(state.serviceFile, state.s3BucketServiceFileName);
+    }
+
+    const path = "/getfilecontent";
+    const file = event.target.files[0];
+    let resp;
+    const filename = Date.now() + "-" + file.name.replace(/ /g, "");
+    setState({ ...state, isLoading: true });
+
+    await uploadFile(file, filename).then(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2-second delay
+      await API.get(myAPI, path + "/" + filename + "IsServiceFile", {
+        headers: {
+          "Content-Type": "text/plain",
+        },
+      }).then((response) => {
+        console.log(response);
+        resp = response;
+      });
+
+      setState({
+        ...state,
+        serviceFile: file,
+        s3BucketServiceFileName: filename,
+        serviceFileName: file.name,
+        caseNumber: resp,
+        isLoading: false,
+      });
+    });
+  };
+
   const handleFileChange = async (event) => {
     if (state.inpFile !== "") {
       deleteFile(state.inpFile, state.s3bucketfileName);
@@ -374,7 +413,6 @@ function Home({ signOut }) {
     const file = event.target.files[0];
     let resp;
     const filename = Date.now() + "-" + file.name.replace(/ /g, "");
-    console.log(file.name);
     setState({ ...state, isLoading: true });
 
     await uploadFile(file, filename).then(async () => {
@@ -382,19 +420,22 @@ function Home({ signOut }) {
 
       // Adding a delay to ensure the file is available in the S3 bucket
       await new Promise((resolve) => setTimeout(resolve, 2000)); // 2-second delay
-
-      const response = await API.get(myAPI, path + "/" + filename, {
+      const myArray = [];
+      await API.get(myAPI, path + "/" + filename, {
         headers: {
           "Content-Type": "text/plain",
         },
       }).then((response) => {
         console.log(response);
         resp = response;
-        console.log(state);
+        const questionPattern = /(\d{1,2}[).]\s)((?:(?!\d{1,2}[).]\s).|\n)+)/g;
+        let match;
+        while ((match = questionPattern.exec(resp)) !== null) {
+          myArray.push(match[2].trim()); // Only push the question text without the number
+        }
+        console.log(myArray);
       });
 
-      let myregexp = new RegExp("\\s+[0-9]+\\.+\\s");
-      const myArray = resp.split(myregexp);
       setState({
         ...state,
         questions: myArray,
@@ -410,93 +451,91 @@ function Home({ signOut }) {
     navigate("/Landingpage");
   };
 
-  const onSubmit = async () => {
+  // const onSubmit = async () => {
+  //   setState({
+  //     ...state,
+  //     value: 10,
+  //     loadingtext: "Creating case...",
+  //     isLoading: true,
+  //   });
+  //   console.log(state.questions);
+  //   const path = "/submitcase";
+  //   const path2 = "/insertquestions";
+  //   const path3 = "/getQuestions";
+  //   const path4 = "/Chatgptcall";
+  //   const formData = new FormData();
+  //   let insertedQuestions = [];
+  //   let insertedId = 0;
+  //   const user = await Auth.currentAuthenticatedUser();
+  //   const loggedinuser = user.username;
+  //   const loggedInuseremail = user.attributes.email;
+
+  //   formData.append("FirstName", state.firstName);
+  //   formData.append("LastName", state.lastName);
+  //   formData.append("MiddleName", state.middleName);
+  //   formData.append("PhoneNumber", state.phoneNumber);
+  //   formData.append("EmailId", state.emailAddress);
+  //   formData.append("CaseId", state.cafseNumber);
+  //   formData.append("s3BucketFileName", state.s3bucketfileName);
+  //   formData.append("s3BucketServiceFileName", state.s3BucketServiceFileName);
+  //   formData.append("Status", myConstClass.STATUS_NEW);
+  //   formData.append("loggedInuseremail", loggedInuseremail);
+  //   formData.append("loggedinuser", loggedinuser);
+  //   formData.append("selectedLawyerId", state.selectedLawyer);
+  //   console.log(formData);
+  //   let insertObj = [];
+  //   const result = await API.post(myAPI, path, {
+  //     body: formData,
+  //   }).then(async (response) => {
+  //     console.log(response);
+  //     formData.append("InsertedId", response);
+  //     insertedId = response;
+  //     console.log(state);
+
+  //     for (var i = 1; i < state.questions.length; ++i) {
+  //       let result = state.questions[i];
+  //       insertObj.push([response, result, i]);
+  //     }
+  //     console.log(insertObj);
+  //     formData.append("insertObj", JSON.stringify(insertObj));
+
+  //     console.log(response);
+  //     await API.post(myAPI, path2, { body: formData }).then(async () => {
+  //       console.log("Succesfully.");
+  //       formData.append("insertedId", insertedId.toString());
+
+  //       await API.get(myAPI, path3 + "/" + insertedId, {
+  //         headers: {
+  //           "Content-Type": "text/plain",
+  //         },
+  //       }).then((resultset) => {
+  //         console.log(resultset);
+  //         insertedQuestions = resultset.recordsets[1];
+  //         API.get(myAPI, path4 + "/" + insertedId);
+  //       });
+  //     });
+  //   });
+
+  //   setState({
+  //     ...state,
+  //     isLoading: false,
+  //     insertedQuestions: insertedQuestions,
+  //     questionTable: insertedQuestions,
+  //     showTable: true,
+  //     insertedId: insertedId,
+  //     caseId: insertedId,
+  //     status: myConstClass.STATUS_NEW,
+  //   });
+  // };
+
+  const setParentState = ({insertedQuestions, insertedId}) => {
     setState({
       ...state,
-      value: 10,
-      loadingtext: "Creating case...",
-      isLoading: true,
-    });
-    console.log(state.questions);
-    const path = "/submitcase";
-    const path2 = "/insertquestions";
-    const path3 = "/getQuestions";
-    const path4 = "/Chatgptcall";
-    const formData = new FormData();
-    let insertedQuestions = [];
-    let insertedId = 0;
-    const user = await Auth.currentAuthenticatedUser();
-    const loggedinuser = user.username;
-    const loggedInuseremail = user.attributes.email;
-
-    let CaseNumber = state.questions[0].match(
-      "CASE NO+\\.\\s+[0-9]+\\-[A-Z]+\\-+[0-9]+"
-    );
-
-    console.log(CaseNumber);
-    formData.append("FirstName", state.firstName);
-    formData.append("LastName", state.lastName);
-    formData.append("MiddleName", state.middleName);
-    formData.append("PhoneNumber", state.phoneNumber);
-    formData.append("EmailId", state.emailAddress);
-    formData.append("CaseId", CaseNumber);
-    formData.append("s3BucketFileName", state.s3bucketfileName);
-    formData.append("Status", myConstClass.STATUS_NEW);
-    formData.append("loggedInuseremail", loggedInuseremail);
-    formData.append("loggedinuser", loggedinuser);
-    formData.append("selectedLawyerId", state.selectedLawyer);
-    console.log(formData);
-    let insertObj = [];
-    const result = await API.post(myAPI, path, {
-      body: formData,
-    }).then(async (response) => {
-      console.log(response);
-      formData.append("InsertedId", response);
-      insertedId = response;
-      console.log(state);
-
-      let CaseNo = new RegExp(
-        "CASE NO+\\.\\s+[0-9]+\\-[A-Z]+\\-+[0-9]+\\s+[0-9]"
-      );
-
-      for (var i = 1; i < state.questions.length - 1; ++i) {
-        let result = state.questions[i].replace(CaseNo, "");
-        result = result.replace(/\n/g, "");
-        result = result.replace(/'/g, "");
-        result = result.replace(/"/g, "");
-        console.log(result);
-        console.log(i);
-        insertObj.push([response, result, i]);
-      }
-      console.log(insertObj);
-      formData.append("insertObj", JSON.stringify(insertObj));
-
-      console.log(response);
-      await API.post(myAPI, path2, { body: formData }).then(async () => {
-        console.log("Succesfully.");
-        formData.append("insertedId", insertedId.toString());
-
-        await API.get(myAPI, path3 + "/" + insertedId, {
-          headers: {
-            "Content-Type": "text/plain",
-          },
-        }).then((resultset) => {
-          console.log(resultset);
-          insertedQuestions = resultset.recordsets[1];
-          API.get(myAPI, path4 + "/" + insertedId);
-        });
-      });
-    });
-
-    setState({
-      ...state,
-      isLoading: false,
       insertedQuestions: insertedQuestions,
       questionTable: insertedQuestions,
       showTable: true,
       insertedId: insertedId,
       caseId: insertedId,
-      caseNumber: CaseNumber[0],
       status: myConstClass.STATUS_NEW,
     });
   };
@@ -640,6 +679,13 @@ function Home({ signOut }) {
     setState({
       ...state,
       showSendWebLinkDialog: true,
+    });
+  };
+
+  const handleViewQuestionsDialog = (isOpen) => {
+    setState({
+      ...state,
+      openViewQuestions: !isOpen,
     });
   };
 
@@ -965,49 +1011,93 @@ function Home({ signOut }) {
                       component="span"
                       //className={classes.button}
                     >
-                      Choose file
+                      Upload Interogatories file
                     </Button>
                   </label>
                   <label style={{ marginLeft: "10px" }}>
                     {state.inpFileName ? state.inpFileName + " uploaded" : ""}
                   </label>
+                  {state.inpFileName && state.questions.length > 0 && (
+                    <React.Fragment>
+                      <Button
+                        variant="text"
+                        color="primary"
+                        style={{ marginLeft: "10px" }}
+                        onClick={() =>
+                          handleViewQuestionsDialog(state.openViewQuestions)
+                        }
+                      >
+                        Show Questions
+                      </Button>
+                      <ViewQuestions
+                        open={state.openViewQuestions}
+                        onClose={() =>
+                          handleViewQuestionsDialog(state.openViewQuestions)
+                        }
+                        questions={state.questions}
+                      />
+                    </React.Fragment>
+                  )}
                 </Grid>
                 <Grid
                   item
                   xs={12}
                   alignItems="left"
                   style={{
+                    textAlign: "left",
+                    marginLeft: "20px",
+                  }}
+                >
+                  <input
+                    accept="pdf/*"
+                    //className={classes.input}
+                    style={{ display: "none" }}
+                    id="raised-button-file1"
+                    multiple
+                    type="file"
+                    onChange={handleServiceFileChange}
+                    disabled={!state.createCasePage}
+                  />
+                  <label htmlFor="raised-button-file1">
+                    <Button
+                      variant="contained"
+                      component="span"
+                      //className={classes.button}
+                    >
+                      Upload Notice Of Service file
+                    </Button>
+                  </label>
+                  <label style={{ marginLeft: "10px" }}>
+                    {state.serviceFileName
+                      ? state.serviceFileName + " uploaded"
+                      : ""}
+                  </label>
+                </Grid>
+                <Grid
+                  item
+                  xs={6}
+                  style={{
                     marginBottom: "20px",
                     textAlign: "left",
                   }}
                 >
-                  <Button
-                    variant="contained"
-                    style={{ marginLeft: "20px" }}
-                    onClick={onSubmit}
-                    disabled={
-                      !state.createCasePage ||
-                      !(
-                        state.firstName !== "" &&
-                        state.lastName !== "" &&
-                        state.phoneNumber !== "" &&
-                        state.emailAddress !== "" &&
-                        state.inpFile != "" &&
-                        state.selectedLawyer != ""
-                      )
-                    }
-                  >
-                    Submit
-                  </Button>
-                  {state.createCasePage && (
-                    <Button
-                      style={{ marginLeft: "10px" }}
-                      variant="text"
-                      onClick={canelCaseCreation}
-                    >
-                      Cancel
-                    </Button>
-                  )}
+                  <Box display="flex" alignItems="center">
+                    <SubmitForm
+                      myAPI={myAPI}
+                      myConstClass={myConstClass}
+                      state={state}
+                      setParentState={setParentState} // Pass the state updater function to update parent's state
+                    />
+                    {state.createCasePage && (
+                      <Button
+                        style={{ marginLeft: "10px" }}
+                        variant="text"
+                        onClick={canelCaseCreation} // Ensure the method name is correctly spelled
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </Box>
                 </Grid>
               </React.Fragment>
             )}
@@ -1030,7 +1120,6 @@ function Home({ signOut }) {
               >
                 {state.questionTable.length > 0 && (
                   <Button
-                    
                     variant="outlined"
                     onClick={() =>
                       handleDownload(state.s3bucketfileName, false, false)

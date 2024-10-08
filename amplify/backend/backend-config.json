@@ -470,6 +470,14 @@
         }
       ]
     },
+    "AMPLIFY_function_getfilecontent_secretsPathAmplifyAppId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "getfilecontent"
+        }
+      ]
+    },
     "AMPLIFY_function_getphonenumber_deploymentBucketName": {
       "usedBy": [
         {
