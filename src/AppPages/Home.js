@@ -13,6 +13,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import DownloadIcon from "@mui/icons-material/Download";
 import ViewQuestions from "./ReusableComponents/ViewQuestionsFromFile";
 import SubmitForm from "./ReusableComponents/SubmitForm";
+import ServiceDialog from "./ReusableComponents/ServiceDialog";
 import {
   Box,
   Grid,
@@ -72,6 +73,19 @@ function Home({ signOut }) {
     inpFileName: "",
     questions: [],
     isLoading: false,
+    serviceFileData:{
+      courtName: "",
+      caseNumber: "",
+      division: "",
+      plaintiffs: "",
+      defendants: "",
+      noticeHeading: "",
+      noticeMatter: "",
+      signature1: "",
+      signature2: "",
+      lawyers: "",
+      certificateText: "",
+    },
     cancelQueue: "",
     emailSent: false,
     insertedQuestions: [],
@@ -102,6 +116,7 @@ function Home({ signOut }) {
     showChatDiaolog: false,
     responseFileName: "",
     responseAttorneyFileName: "",
+    serviceDialogOpen:false,
   };
   const [state, setState] = useState(initialState);
   const navigate = useNavigate();
@@ -149,6 +164,7 @@ function Home({ signOut }) {
           createCasePage: false,
           caseId: selectedRow.Id,
           caseNumber: selectedRow.CaseId,
+          serviceFileData: selectedRow.serviceFileData!==undefined?JSON.parse(selectedRow.serviceFileData):state.serviceFileData,
           isLoading: false,
           status: selectedRow.Status.includes(",")
             ? myConstClass.STATUS_CANCEL
@@ -390,16 +406,17 @@ function Home({ signOut }) {
         },
       }).then((response) => {
         console.log(response);
-        resp = response;
-      });
-
-      setState({
-        ...state,
-        serviceFile: file,
-        s3BucketServiceFileName: filename,
-        serviceFileName: file.name,
-        caseNumber: resp,
-        isLoading: false,
+        const jsonResponse = response;
+        
+        setState({
+          ...state,
+          serviceFile: file,
+          s3BucketServiceFileName: filename,
+          serviceFileName: file.name,
+          caseNumber: jsonResponse.caseNumber === 'not found' ? "" : jsonResponse.caseNumber,
+          isLoading: false,
+          serviceFileData : jsonResponse
+        });
       });
     });
   };
@@ -451,84 +468,8 @@ function Home({ signOut }) {
     navigate("/Landingpage");
   };
 
-  // const onSubmit = async () => {
-  //   setState({
-  //     ...state,
-  //     value: 10,
-  //     loadingtext: "Creating case...",
-  //     isLoading: true,
-  //   });
-  //   console.log(state.questions);
-  //   const path = "/submitcase";
-  //   const path2 = "/insertquestions";
-  //   const path3 = "/getQuestions";
-  //   const path4 = "/Chatgptcall";
-  //   const formData = new FormData();
-  //   let insertedQuestions = [];
-  //   let insertedId = 0;
-  //   const user = await Auth.currentAuthenticatedUser();
-  //   const loggedinuser = user.username;
-  //   const loggedInuseremail = user.attributes.email;
-
-  //   formData.append("FirstName", state.firstName);
-  //   formData.append("LastName", state.lastName);
-  //   formData.append("MiddleName", state.middleName);
-  //   formData.append("PhoneNumber", state.phoneNumber);
-  //   formData.append("EmailId", state.emailAddress);
-  //   formData.append("CaseId", state.cafseNumber);
-  //   formData.append("s3BucketFileName", state.s3bucketfileName);
-  //   formData.append("s3BucketServiceFileName", state.s3BucketServiceFileName);
-  //   formData.append("Status", myConstClass.STATUS_NEW);
-  //   formData.append("loggedInuseremail", loggedInuseremail);
-  //   formData.append("loggedinuser", loggedinuser);
-  //   formData.append("selectedLawyerId", state.selectedLawyer);
-  //   console.log(formData);
-  //   let insertObj = [];
-  //   const result = await API.post(myAPI, path, {
-  //     body: formData,
-  //   }).then(async (response) => {
-  //     console.log(response);
-  //     formData.append("InsertedId", response);
-  //     insertedId = response;
-  //     console.log(state);
-
-  //     for (var i = 1; i < state.questions.length; ++i) {
-  //       let result = state.questions[i];
-  //       insertObj.push([response, result, i]);
-  //     }
-  //     console.log(insertObj);
-  //     formData.append("insertObj", JSON.stringify(insertObj));
-
-  //     console.log(response);
-  //     await API.post(myAPI, path2, { body: formData }).then(async () => {
-  //       console.log("Succesfully.");
-  //       formData.append("insertedId", insertedId.toString());
-
-  //       await API.get(myAPI, path3 + "/" + insertedId, {
-  //         headers: {
-  //           "Content-Type": "text/plain",
-  //         },
-  //       }).then((resultset) => {
-  //         console.log(resultset);
-  //         insertedQuestions = resultset.recordsets[1];
-  //         API.get(myAPI, path4 + "/" + insertedId);
-  //       });
-  //     });
-  //   });
-
-  //   setState({
-  //     ...state,
-  //     isLoading: false,
-  //     insertedQuestions: insertedQuestions,
-  //     questionTable: insertedQuestions,
-  //     showTable: true,
-  //     insertedId: insertedId,
-  //     caseId: insertedId,
-  //     status: myConstClass.STATUS_NEW,
-  //   });
-  // };
-
-  const setParentState = ({insertedQuestions, insertedId}) => {
+  
+  const setParentState = ({ insertedQuestions, insertedId }) => {
     setState({
       ...state,
       insertedQuestions: insertedQuestions,
@@ -537,6 +478,7 @@ function Home({ signOut }) {
       insertedId: insertedId,
       caseId: insertedId,
       status: myConstClass.STATUS_NEW,
+      caseNumber: state.caseNumber ? state.caseNumber : `CA-00${insertedId}`,
     });
   };
 
@@ -557,10 +499,15 @@ function Home({ signOut }) {
       path + "/" + state.caseId + "-" + myConstClass.STATUS_ATTESTED
     ).then(async (response) => {
       console.log(response);
-      const path1 = "/updateQuestions";
-      const formData = new FormData();
-      formData.append("data", JSON.stringify(state.questionTable));
-      await API.post(myAPI, path1, { body: formData }).then(() => {});
+      const inactiveQuestionsCount = state.questionTable.filter(
+        (question) => !question.IsQuestionActive
+      ).length;
+      if (inactiveQuestionsCount) {
+        const path1 = "/updateQuestions";
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(state.questionTable));
+        await API.post(myAPI, path1, { body: formData }).then(() => {});
+      }
     });
     setState({
       ...state,
@@ -638,6 +585,17 @@ function Home({ signOut }) {
       ...state,
       showAttestDialog: true,
     });
+  };
+
+  const handleServiceDialogOpen = () => {
+    setState({
+      ...state,
+      serviceDialogOpen: true,
+    });
+  };
+
+  const handleServiceDialogClose = () => {
+    setState({...state, serviceDialogOpen:false});
   };
 
   const handleDialogClose = () => {
@@ -1108,14 +1066,14 @@ function Home({ signOut }) {
           state.showTable) && (
           <React.Fragment>
             <Grid container alignItems="center" style={{ marginTop: "20px" }}>
-              <Grid item xs={5}>
+              <Grid item xs={3}>
                 <Typography variant="h6" gutterBottom>
                   Irog List{" "}
                 </Typography>
               </Grid>
               <Grid
                 item
-                xs={7}
+                xs={9}
                 style={{ display: "flex", justifyContent: "flex-end" }}
               >
                 {state.questionTable.length > 0 && (
@@ -1128,6 +1086,19 @@ function Home({ signOut }) {
                   >
                     Questionnaire
                   </Button>
+                )}
+                {state.status === myConstClass.STAUS_COMPLETE && (
+                  <React.Fragment>
+                  <ServiceDialog handleDownload={handleDownload} data={state.serviceFileData} open={state.serviceDialogOpen} handleClose={handleServiceDialogClose}  />
+                  <Button
+                    variant="outlined"
+                    style={{ marginLeft: "20px" }}
+                    onClick={handleServiceDialogOpen}
+                    startIcon={<DownloadIcon />}
+                  >
+                    Generate Service file
+                  </Button>
+                  </React.Fragment>
                 )}
                 {state.status === myConstClass.STAUS_COMPLETE && (
                   <WordGenerator

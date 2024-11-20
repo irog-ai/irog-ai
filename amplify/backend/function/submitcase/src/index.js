@@ -64,16 +64,18 @@ exports.handler = async (event) => {
       request.input("LoggedInUser", sql.NVarChar, formdata.loggedinuser);
       request.input("LoggedInUserEmail", sql.NVarChar, formdata.loggedInuseremail);
       request.input("LawyerId", sql.Int, formdata.selectedLawyerId);
+      request.input("ServiceFileData", sql.NVarChar, formdata.serviceFileData);
 
       const insertionQuery = `
-        INSERT INTO [Cases] (FirstName, MiddleName, LastName, PhoneNumber, EmailId, s3BucketFileName, ServiceFileName, Status, LoggedInUser, LoggedInUserEmail, CreateTimeStamp, LawyerId)
-        VALUES (@FirstName, @MiddleName, @LastName, @PhoneNumber, @EmailId, @s3BucketFileName, @ServiceFileName, @Status, @LoggedInUser, @LoggedInUserEmail, GETDATE(), @LawyerId);
+        INSERT INTO [Cases] (FirstName, MiddleName, LastName, PhoneNumber, EmailId, s3BucketFileName, ServiceFileName, Status, LoggedInUser, LoggedInUserEmail, CreateTimeStamp, LawyerId, ServiceFileData)
+        VALUES (@FirstName, @MiddleName, @LastName, @PhoneNumber, @EmailId, @s3BucketFileName, @ServiceFileName, @Status, @LoggedInUser, @LoggedInUserEmail, GETDATE(), @LawyerId, @ServiceFileData);
         SELECT SCOPE_IDENTITY() as id;
       `;
 
       const result = await request.query(insertionQuery);
       insertedId = result.recordset[0].id;
       const generatedCaseId = formdata.CaseId || `CA-00${insertedId}`;
+      console.log("++++++++"+generatedCaseId);
 
       const updateRequest = new sql.Request(transaction);
       await updateRequest
@@ -94,7 +96,7 @@ exports.handler = async (event) => {
           "Access-Control-Allow-Headers": "*",
           "Content-Type": "text/plain",
         },
-        body: JSON.stringify({ caseId: generatedCaseId }),
+        body: JSON.stringify({ caseId: insertedId }),
       };
     } catch (error) {
       await transaction.rollback();

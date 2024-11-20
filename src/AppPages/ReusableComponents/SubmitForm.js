@@ -26,6 +26,7 @@ const SubmitForm = ({ myAPI, myConstClass, state, setParentState }) => {
     });
 
     try {
+      console.log(state.caseNumber);
       const user = await Auth.currentAuthenticatedUser();
 
       // Populate formData
@@ -37,7 +38,8 @@ const SubmitForm = ({ myAPI, myConstClass, state, setParentState }) => {
       formData.append("MiddleName", state.middleName);
       formData.append("PhoneNumber", state.phoneNumber);
       formData.append("EmailId", state.emailAddress);
-      formData.append("CaseId", state.cafseNumber);
+      formData.append("CaseId", state.caseNumber);
+      formData.append("serviceFileData",state.serviceFileData);
       formData.append("s3BucketFileName", state.s3bucketfileName);
       formData.append("s3BucketServiceFileName", state.s3BucketServiceFileName);
       formData.append("Status", myConstClass.STATUS_NEW);
@@ -45,7 +47,8 @@ const SubmitForm = ({ myAPI, myConstClass, state, setParentState }) => {
 
       // Step 1: Submit case
       const response = await API.post(myAPI, "/submitcase", { body: formData });
-      const insertedId = response;
+      console.log(response); 
+      const insertedId = response.caseId;
       setLoadingState({
         isLoading: true,
         value: 40,
@@ -56,7 +59,7 @@ const SubmitForm = ({ myAPI, myConstClass, state, setParentState }) => {
       const insertObj = state.questions.map((question, index) => [
         insertedId,
         question,
-        index,
+        index+1,
       ]);
       formData.append("insertObj", JSON.stringify(insertObj));
       await API.post(myAPI, "/insertquestions", { body: formData });
@@ -77,8 +80,8 @@ const SubmitForm = ({ myAPI, myConstClass, state, setParentState }) => {
         loadingText: "Performing ChatGPT call...",
       });
 
-      // Step 4: Call ChatGPT
-      await API.get(myAPI, `/Chatgptcall/${insertedId}`);
+      // Step 4: Call ChatGPT asynchronously
+      API.get(myAPI, `/Chatgptcall/${insertedId}`);
 
       resetLoadingState();
 
@@ -97,39 +100,42 @@ const SubmitForm = ({ myAPI, myConstClass, state, setParentState }) => {
   };
   const styles = {
     container: {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      zIndex: 7000, // Ensure the CircularProgress is above other elements
-    },
-    backdrop: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      backgroundColor: "rgba(255, 255, 255, 0.5)", // Adjust the opacity
-      zIndex: 6999, // Set a lower z-index for the backdrop
-      backdropFilter: "blur(5px)", // Apply blur effect here
-    },
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 7000, // Ensure the CircularProgress is above other elements
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      },
+      backdrop: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(255, 255, 255, 0.5)', // Adjust the opacity
+        zIndex: 6999, // Set a lower z-index for the backdrop
+        backdropFilter: 'blur(5px)', // Apply blur effect here
+      },
   };
 
   return (
     <Box>
       {loadingState.isLoading && (
         <Box>
-          <div style={styles.backdrop} />
-          <div style={styles.container}>
-            <CircularProgress
-              variant="determinate"
-              value={loadingState.value}
-            />
-          </div>
-          <Typography variant="body2" style={{ marginTop: "10px" }}>
+        <div style={styles.backdrop} />
+        <div style={styles.container}>
+          <CircularProgress
+            variant="determinate"
+            value={loadingState.value}
+          />
+          <Typography variant="body2" style={{ marginTop: '10px', color: 'black' }}>
             {loadingState.loadingText}
           </Typography>
-        </Box>
+        </div>
+      </Box>
       )}
       <Button
         variant="contained"
