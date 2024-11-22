@@ -17,6 +17,7 @@ import LandingPage from "./AppPages/LandingPage";
 import MainLandingpage from "./AppPages/LandingPage/MainLandingpage";
 import Submit from "./AppPages/SubmitForm/Submit";
 import Faq from "./AppPages/FaqPage";
+import PrivacyPolicy from "./AppPages/PrivacyPolicyPage";
 import Layout from "./AppPages/LandingPage/Layout";
 import Contactus from "./AppPages/Contactus";
 import LawyerInfo from "./AppPages/LawyerInfo";
@@ -34,13 +35,14 @@ function App() {
   const [input, setInput] = useState("");
   const [customers, setCustomers] = useState([]);
   return (
-    <div style={{ display: "flex" }}>
+    <div>
       
       <Routes>
         
         <Route path="/" element={<Layout />}>
           <Route index element={<MainLandingpage />} />
           <Route path="faq" element={<Faq />} />
+          <Route path="privacypolicy" element={<PrivacyPolicy />} />
           <Route path="contactus" element={<Contactus />} />
           <Route path="/signin" element={<CustomSignIn />} />
             <Route path="/signup" element={<CustomSignUp />} />
