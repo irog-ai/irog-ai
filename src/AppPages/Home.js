@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { json, useLocation, useNavigate } from "react-router-dom";
 
 // Material-UI Components
 import InputLabel from "@mui/material/InputLabel";
@@ -76,15 +76,16 @@ function Home({ signOut }) {
     serviceFileData:{
       courtName: "",
       caseNumber: "",
+      propundingPartyRole:"",
+      propundingPartyNames:[],
+      respondingPartyRole:"",
+      respondingPartyNames:[],
       division: "",
-      plaintiffs: "",
-      defendants: "",
       noticeHeading: "",
       noticeMatter: "",
-      signature1: "",
-      signature2: "",
-      lawyers: "",
+      lawyersJson:{},
       certificateText: "",
+      interrogatoryFileTitle:""
     },
     cancelQueue: "",
     emailSent: false,
@@ -151,7 +152,7 @@ function Home({ signOut }) {
           tableData = await response.recordsets[1];
           selectedRow = response.recordsets[0][0];
         });
-
+        console.log(selectedRow.ServiceFileData);
         setState({
           ...state,
           questionTable: tableData,
@@ -164,7 +165,7 @@ function Home({ signOut }) {
           createCasePage: false,
           caseId: selectedRow.Id,
           caseNumber: selectedRow.CaseId,
-          serviceFileData: selectedRow.serviceFileData!==undefined?JSON.parse(selectedRow.serviceFileData):state.serviceFileData,
+          serviceFileData: selectedRow.ServiceFileData!==undefined?JSON.parse(selectedRow.ServiceFileData):state.serviceFileData,
           isLoading: false,
           status: selectedRow.Status.includes(",")
             ? myConstClass.STATUS_CANCEL
@@ -406,7 +407,8 @@ function Home({ signOut }) {
         },
       }).then((response) => {
         console.log(response);
-        const jsonResponse = response;
+        let jsonResponse = response;
+        jsonResponse={...jsonResponse,interrogatoryFileTitle:state.serviceFileData.interrogatoryFileTitle }
         
         setState({
           ...state,
@@ -429,8 +431,10 @@ function Home({ signOut }) {
     const path = "/getfilecontent";
     const file = event.target.files[0];
     let resp;
+    let  serviceFileData={...state.serviceFileData};
     const filename = Date.now() + "-" + file.name.replace(/ /g, "");
     setState({ ...state, isLoading: true });
+
 
     await uploadFile(file, filename).then(async () => {
       console.log(file);
@@ -444,7 +448,8 @@ function Home({ signOut }) {
         },
       }).then((response) => {
         console.log(response);
-        resp = response;
+        resp = response.questions;
+        serviceFileData={...state.serviceFileData,interrogatoryFileTitle:resp.fileTitle};
         const questionPattern = /(\d{1,2}[).]\s)((?:(?!\d{1,2}[).]\s).|\n)+)/g;
         let match;
         while ((match = questionPattern.exec(resp)) !== null) {
@@ -460,6 +465,7 @@ function Home({ signOut }) {
         inpFileName: file.name,
         s3bucketfileName: filename,
         isLoading: false,
+        serviceFileData: serviceFileData
       });
     });
   };

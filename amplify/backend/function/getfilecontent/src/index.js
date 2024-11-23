@@ -68,37 +68,8 @@ exports.handler = async (event) => {
 
     // Prepare the prompt for ChatGPT
     const prompt = isServiceFile
-      ? `Please extract the following details from the provided text and format the output in JSON:
-
-1. Court Name: Look for the name of the court.
-2. Case Number: Find the line containing 'CASE NO' and extract the case number.
-3. Division: Look for the 'DIVISION' section and extract its value.
-4. Plaintiffs: Identify and extract the names listed under plaintiffs.
-5. Defendants: Identify and extract the names listed under defendants.
-6. Notice Heading: Locate and extract the heading of the notice.
-7. Notice Matter: Extract the full text of the notice matter.
-8. Signature and Lawyers (Signature 1): Extract the signatures and lawyer details.
-9. Certificate of Service Matter: Extract the full certificate of service text.
-10. Signature 2: Find and extract the second signature field.
-
-If any information is not found, return 'not found' for that field.
-
-Output:
-
-{
-  "courtName": "<court_name_here>",
-  "caseNumber": "<case_number_here>",
-  "division": "<division_here>",
-  "plaintiffs": "<plaintiffs_here>",
-  "defendants": "<defendants_here>",
-  "noticeHeading": "<notice_heading_here>",
-  "noticeMatter": "<notice_matter_here>",
-  "signature1": "<signature_and_lawyers_here>",
-  "certificateText": "<certificate_of_service_here>",
-  "signature2": "<signature_2_here>"
-}
-\n${plainText}`
-      : `Extract and give me the list of questions from the following text:\n${plainText}`;
+      ? process.env.SERIVE_FILE_PROMPT +"---"+ plainText
+      : process.env.INTERROGATORY_PROMPT+"---"+plainText;
 
     // Call OpenAI's ChatGPT API
     const chatgptdata = {
