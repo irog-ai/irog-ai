@@ -27,6 +27,8 @@ const Layout = () => {
   const open = Boolean(anchorEl);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+
     const path = location.pathname.split("/")[1];
     setSelectedButton(path || "home");
 
@@ -46,13 +48,62 @@ const Layout = () => {
 
     fetchUser();
 
+      /* account dropdown box */
+      const loggedInElement = document.getElementById('page-header--logged-in');
+      if (loggedInElement !== null)
+      {
+        loggedInElement.addEventListener('click', toggleDropdown);
+      }
+
+      document.addEventListener('click', hideDropdown);
+
+      function toggleDropdown()
+      {
+          if (loggedInElement === null)
+          {
+              return;
+          }
+          if (loggedInElement.classList.contains('dropdown-visible'))
+          {
+              loggedInElement.classList.remove('dropdown-visible');
+          }
+          else
+          {
+              loggedInElement.classList.add('dropdown-visible');
+          }
+      }
+
+      function hideDropdown(event)
+      {
+          if (loggedInElement === null)
+          {
+              return;
+          }
+          if (!loggedInElement.contains(event.target))
+          {
+              if (loggedInElement.classList.contains('dropdown-visible'))
+              {
+                  loggedInElement.classList.remove('dropdown-visible');
+              }
+          }
+      }
+
+
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+        window.removeEventListener("scroll", handleScroll);
+        document.removeEventListener('click', hideDropdown);
+        if (loggedInElement !== null) {
+            loggedInElement.removeEventListener('click', toggleDropdown);
+        }
+    };
   }, [location.pathname]);
 
-  const handleButtonClick = (buttonName, route) => {
+  const handleButtonClick = (event, buttonName, route) => {
     setSelectedButton(buttonName);
     navigate(route);
+    if(event!=null)event.preventDefault();
   };
 
   const handleMouseEnter = () => {
@@ -85,7 +136,7 @@ const Layout = () => {
   const handleLoginButtonClick = () => {
     if (user) {
       setAnchorEl(null);
-      handleButtonClick("login", "/Landingpage");
+      handleButtonClick(null, "login", "/Landingpage");
     } else {
       setShowAuthDialog(true);
     }
@@ -111,136 +162,113 @@ const Layout = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar
-        position="fixed"
-        sx={{
-          backgroundColor: scrolled ? "rgba(76, 101, 150, 0.4)" : "#2c4376",
-          transition: "background-color 0.3s",
-          boxShadow: "none",
-        }}
-      >
-        <Toolbar>
-          <Button
-            variant="text"
-            style={{ color: "white", fontSize: "large" }}
-            onClick={() => handleButtonClick("home", "/")}
-          >
-            <img
-              src={logo}
-              alt="Image from public"
-              style={imgStyle}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            />
-          </Button>
-          <Box sx={{ flexGrow: 1 }} />
-          <Button
-            sx={{
-              border: selectedButton === "home" ? "1px solid white" : "none",
-              borderRadius: "5px",
-              margin: "15px",
-              transition: "filter 0.3s", // Smooth transition for the hover effect
-              "&:hover": {
-                filter: "brightness(0.8)",
-              },
-            }}
-            onClick={() => handleButtonClick("home", "/")}
-            color="inherit"
-          >
-            HOME
-          </Button>
-          <Button
-            sx={{
-              border: selectedButton === "faq" ? "1px solid white" : "none",
-              borderRadius: "5px",
-              margin: "15px",
-              transition: "filter 0.3s", // Smooth transition for the hover effect
-              "&:hover": {
-                filter: "brightness(0.8)",
-              },
-            }}
-            onClick={() => handleButtonClick("faq", "/Faq")}
-            color="inherit"
-          >
-            FAQ
-          </Button>
-          <Button
-            sx={{
-              border:
-                selectedButton === "contactus" ? "1px solid white" : "none",
-              borderRadius: "5px",
-              margin: "15px",
-              transition: "filter 0.3s", // Smooth transition for the hover effect
-              "&:hover": {
-                filter: "brightness(0.8)",
-              },
-            }}
-            onClick={() => handleButtonClick("contactus", "/Contactus")}
-            color="inherit"
-          >
-            CONTACT US
-          </Button>
-          {user ? (
-            <>
-              {/* <IconButton
-                onClick={handleMenuClick}
-                color="inherit"
-                sx={{
-                  border: selectedButton === "login" ? "1px solid white" : "none",
-                  borderRadius: "5px",
-                  //margin: "15px",
-                }}
-              >
-                <AccountCircle />
-                {user.attributes.given_name + " " + user.attributes.family_name}
-              </IconButton> */}
-              <Button
-                onClick={handleMenuClick}
-                color="inherit"
-                sx={{
-                  border:
-                    selectedButton === "login" ? "1px solid white" : "none",
-                  borderRadius: "5px",
-                  margin: "15px",
-                  transition: "filter 0.3s", // Smooth transition for the hover effect
-                  "&:hover": {
-                    filter: "brightness(0.8)",
-                  },
-                }}
-                startIcon={<AccountCircle />}
-              >
-                {user.attributes.given_name + " " + user.attributes.family_name}
-              </Button>
-              <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
-                <MenuItem onClick={handleLoginButtonClick}>Dashboard</MenuItem>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <Button
-              sx={{
-                border: selectedButton === "login" ? "1px solid white" : "none",
-                borderRadius: "5px",
-                margin: "15px",
-              }}
-              onClick={handleLoginButtonClick}
-              color="inherit"
-            >
-              LOGIN
-            </Button>
-          )}
-        </Toolbar>
-      </AppBar>
-      <Toolbar />
-      <Outlet />
+      <>
+          <div id="page-container">
+              <header id="page-header" className={'header' + (location.pathname === '/' ? ' clear-header' : '')}>
+              <div id="page-header--shadow"/>
+              <div id="page-header--background"/>
+              <div id="page-header--inner-container">
+                  <div id="page-header--logo">
+                      <a href="/"/>
+                  </div>
+                  <nav id="page-header--nav">
+                      <ul>
+                          <li>
+                              <a href="/"
+                                 onClick={(e) => handleButtonClick(e, "home", "/")}
+                              >
+                                  <span>Home</span>
+                              </a>
+                          </li>
+                          <li>
+                              <a href="/faq"
+                                 onClick={(e) => handleButtonClick(e, "faq", "/Faq")}
+                              >
+                                  <span>FAQ</span>
+                              </a>
+                          </li>
+                          <li>
+                              <a href="/contactus"
+                                 onClick={(e) => handleButtonClick(e, "contactus", "/Contactus")}
+                              >
+                                  <span>Contact Us</span>
+                              </a>
+                          </li>
+                          {user ? (
+                              <>
+                                  <li id="page-header--logged-in">
+                                      <span>
+                                          <div className="profile-circle">
+                                              {<AccountCircle/>}
+                                          </div>
+                                          {user.attributes.given_name + " " + user.attributes.family_name}
+                                      </span>
+                                      <div id="page-header--account-dropdown">
+                                          <div id="page-header--account-dropdown-arrow"/>
+                                          <div id="page-header--account-dropdown-container">
+                                              <ul>
+                                                  <li>
+                                                      <a
+                                                          onClick={handleLoginButtonClick}
+                                                      >Dashboard</a>
+                                                  </li>
+                                                  <li>
+                                                      <a
+                                                          onClick={handleLogout}
+                                                      >Log out</a>
+                                                  </li>
+                                              </ul>
+                                          </div>
+                                      </div>
+                                  </li>
 
-      {/* CustomAuth Dialog */}
-      <CustomAuth
-        open={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
-      />
-    </Box>
+                              </>
+                          ) : (
+                              <>
+                                  <li>
+                                      <a
+                                          onClick={handleLoginButtonClick}
+                                      >
+                                          <span>Log In</span>
+                                      </a>
+                                  </li>
+                              </>
+                          )}
+                      </ul>
+                  </nav>
+              </div>
+          </header>
+          <Outlet/>
+          <section>
+              <footer>
+                  <nav id="footer-nav">
+                      <ul>
+                          <li><a href="/faq"
+                                 onClick={(e) =>
+                                     handleButtonClick(e, "faq", "/Faq")}
+                          >FAQ</a></li>
+                          <li><a href="/contactus"
+                                 onClick={(e) =>
+                                     handleButtonClick(e, "contactus", "/Contactus")}
+                          >Contact Us</a></li>
+                          <li><a href="/privacypolicy"
+                                 onClick={(e) =>
+                                     handleButtonClick(e, "privacypolicy", "/Privacypolicy")}
+                          >Privacy Policy</a></li>
+                      </ul>
+                  </nav>
+                  <p id="footer-copyright">© 2024 CG Legal Tech, LLC</p>
+              </footer>
+          </section>
+          </div>
+
+          {/* CustomAuth Dialog */}
+          <CustomAuth
+              open={showAuthDialog}
+              onClose={() => setShowAuthDialog(false)}
+          />
+      </>
+
   );
 };
 
