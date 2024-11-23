@@ -103,7 +103,7 @@ const Layout = () => {
   const handleButtonClick = (event, buttonName, route) => {
     setSelectedButton(buttonName);
     navigate(route);
-    event.preventDefault();
+    if(event!=null)event.preventDefault();
   };
 
   const handleMouseEnter = () => {
@@ -201,7 +201,7 @@ const Layout = () => {
                                           <div className="profile-circle">
                                               {<AccountCircle/>}
                                           </div>
-                                        Leigh West
+                                          {user.attributes.given_name + " " + user.attributes.family_name}
                                       </span>
                                       <div id="page-header--account-dropdown">
                                           <div id="page-header--account-dropdown-arrow"/>
