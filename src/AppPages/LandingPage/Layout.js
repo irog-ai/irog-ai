@@ -48,57 +48,40 @@ const Layout = () => {
 
     fetchUser();
 
-      /* account dropdown box */
-      const loggedInElement = document.getElementById('page-header--logged-in');
-      if (loggedInElement !== null)
-      {
-        loggedInElement.addEventListener('click', toggleDropdown);
-      }
-
-      document.addEventListener('click', hideDropdown);
-
-      function toggleDropdown()
-      {
-          if (loggedInElement === null)
-          {
-              return;
-          }
-          if (loggedInElement.classList.contains('dropdown-visible'))
-          {
-              loggedInElement.classList.remove('dropdown-visible');
-          }
-          else
-          {
-              loggedInElement.classList.add('dropdown-visible');
-          }
-      }
-
-      function hideDropdown(event)
-      {
-          if (loggedInElement === null)
-          {
-              return;
-          }
-          if (!loggedInElement.contains(event.target))
-          {
-              if (loggedInElement.classList.contains('dropdown-visible'))
-              {
-                  loggedInElement.classList.remove('dropdown-visible');
-              }
-          }
-      }
-
-
-
+    document.addEventListener('click', hideDropdown);
     window.addEventListener("scroll", handleScroll);
     return () => {
         window.removeEventListener("scroll", handleScroll);
         document.removeEventListener('click', hideDropdown);
-        if (loggedInElement !== null) {
-            loggedInElement.removeEventListener('click', toggleDropdown);
-        }
     };
   }, [location.pathname]);
+
+  const toggleDropdown = () => {
+      const loggedInElement = document.getElementById('page-header--logged-in');
+      if (!loggedInElement)
+          return;
+      if (loggedInElement.classList.contains('dropdown-visible'))
+      {
+          loggedInElement.classList.remove('dropdown-visible');
+      }
+      else
+      {
+          loggedInElement.classList.add('dropdown-visible');
+      }
+  }
+
+  const hideDropdown = (event) => {
+      const loggedInElement = document.getElementById('page-header--logged-in');
+      if (!loggedInElement)
+          return;
+      if (!loggedInElement.contains(event.target))
+      {
+          if (loggedInElement.classList.contains('dropdown-visible'))
+          {
+              loggedInElement.classList.remove('dropdown-visible');
+          }
+      }
+  }
 
   const handleButtonClick = (event, buttonName, route) => {
     setSelectedButton(buttonName);
@@ -196,7 +179,9 @@ const Layout = () => {
                           </li>
                           {user ? (
                               <>
-                                  <li id="page-header--logged-in">
+                                  <li id="page-header--logged-in"
+                                    onClick={toggleDropdown}
+                                  >
                                       <span>
                                           <div className="profile-circle">
                                               {<AccountCircle/>}
