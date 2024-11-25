@@ -974,17 +974,26 @@ footer nav ul li {
 
 /* FAQ */
 #faq {
-    /**/
+    counter-set: question 0;
 }
-#faq ul {
+#faq ol {
     list-style: none;
     padding: 0;
-    margin: 60px 0;
 }
-.faq--item {
-    margin: 30px 0;
-    padding: 0 0 30px 0;
+#faq ul {
+    list-style: disc;
+}
+#faq ol > li {
+    margin: 40px 0;
+    padding: 0 0 40px 0;
     border-bottom: 1px solid var(--white2)
+}
+#faq ol > li > h3::before {
+    content: counter(question) ". ";
+    counter-increment: question;
+}
+#faq p:last-of-type {
+    margin-bottom: 0;
 }
 #faq--footnote {
     text-align: center;
@@ -997,8 +1006,4 @@ footer nav ul li {
 #privacy-policy ol {
     padding: 0;
     list-style: none;
-}
-#privacy-policy ol > li > ul{
-    /*padding: 0;*/
-    /*list-style: none;*/
 }
