@@ -18,6 +18,7 @@ import MainLandingpage from "./AppPages/LandingPage/MainLandingpage";
 import Submit from "./AppPages/SubmitForm/Submit";
 import Faq from "./AppPages/FaqPage";
 import PrivacyPolicy from "./AppPages/PrivacyPolicyPage";
+import Terms from "./AppPages/TermsPage";
 import Layout from "./AppPages/LandingPage/Layout";
 import Contactus from "./AppPages/Contactus";
 import LawyerInfo from "./AppPages/LawyerInfo";
@@ -43,6 +44,7 @@ function App() {
           <Route index element={<MainLandingpage />} />
           <Route path="faq" element={<Faq />} />
           <Route path="privacypolicy" element={<PrivacyPolicy />} />
+          <Route path="terms" element={<Terms />} />
           <Route path="contactus" element={<Contactus />} />
           <Route path="/signin" element={<CustomSignIn />} />
             <Route path="/signup" element={<CustomSignUp />} />

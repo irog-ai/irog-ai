@@ -7,17 +7,15 @@ export default function Contactus() {
     });
 
     return (
-      <div id="page-content-container">
-          <section id="contact-us" className="text-content">
-              <h1>Contact Us</h1>
-              <h2>
-                  <a href="mailto:lw@irog.ai">lw@irog.ai</a>
-              </h2>
-              <p>
-                  If you're interested in our services, don't hesitate to get in touch via
-                  the email address above.
-              </p>
-          </section>
-      </div>
+        <section id="contact-us" className="text-content page-content-container">
+            <h1>Contact Us</h1>
+            <h2>
+                <a href="mailto:info@irog.ai">info@irog.ai</a>
+            </h2>
+            <p>
+                If you're interested in our services, don't hesitate to get in touch via
+                the email address above.
+            </p>
+        </section>
   );
 }
