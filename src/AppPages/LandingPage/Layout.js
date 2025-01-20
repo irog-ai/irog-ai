@@ -83,9 +83,25 @@ const Layout = () => {
       }
   }
 
+  const toggleMenu = () => {
+      if (document.querySelector('body').classList.contains('mobile-menu-open'))
+      {
+          document.querySelector('body').classList.remove('mobile-menu-open')
+      }
+      else
+      {
+          document.querySelector('body').classList.add('mobile-menu-open');
+      }
+  }
+
+  const closeMenu = () => {
+      document.querySelector('body').classList.remove('mobile-menu-open')
+  }
+
   const handleButtonClick = (event, buttonName, route) => {
     setSelectedButton(buttonName);
     navigate(route);
+    closeMenu();
     if(event!=null)event.preventDefault();
   };
 
@@ -146,16 +162,40 @@ const Layout = () => {
 
   return (
       <>
+          <nav id="mobile-menu--container">
+              <div id="mobile-menu--header-background"></div>
+              <div id="mobile-menu--container-inner">
+                  <ul>
+                      {user ? (
+                          <>
+                              <span id="mobile-menu--user-name">{user.attributes.given_name + " " + user.attributes.family_name}</span>
+                              <hr/>
+                              <li><a onClick={handleLoginButtonClick}>Dashboard</a></li>
+                              <li><a onClick={handleLogout}>Log out</a></li>
+                          </>
+                      ) : (
+                          <>
+                              <li><a onClick={handleLoginButtonClick}>Log in</a></li>
+                          </>
+                      )}
+                      <hr/>
+                      <li><a href="/" onClick={(e) => handleButtonClick(e, "home", "/")}><span>Home</span></a></li>
+                      <li><a href="/faq" onClick={(e) => handleButtonClick(e, "faq", "/Faq")}><span>FAQ</span></a></li>
+                      <li><a href="/contactus" onClick={(e) => handleButtonClick(e, "contactus", "/Contactus")}><span>Contact Us</span></a></li>
+                  </ul>
+              </div>
+          </nav>
           <div id="page-container">
+              <div id="page-overlay" onClick={closeMenu}></div>
               <header id="page-header" className={'header' + (location.pathname === '/' ? ' clear-header' : '')}>
               <div id="page-header--shadow"/>
               <div id="page-header--background"/>
-              <div id="page-header--inner-container">
+              <div id="page-header--inner-container" class="page-content-container">
                   <div id="page-header--logo">
                       <a href="/"/>
                   </div>
                   <nav id="page-header--nav">
-                      <ul>
+                      <ul id="page-header--nav-desktop">
                           <li>
                               <a href="/"
                                  onClick={(e) => handleButtonClick(e, "home", "/")}
@@ -220,31 +260,41 @@ const Layout = () => {
                               </>
                           )}
                       </ul>
+                      <div id="page-header--nav-mobile">
+                          <button id="page-header--menu-icon" class="page-header--menu-icon-open" onClick={toggleMenu}>
+                              <div id="page-header--menu-icon-line-1" class="page-header--menu-icon-line"></div>
+                              <div id="page-header--menu-icon-line-2" class="page-header--menu-icon-line"></div>
+                              <div id="page-header--menu-icon-line-3" class="page-header--menu-icon-line"></div>
+                          </button>
+                      </div>
                   </nav>
               </div>
           </header>
-          <Outlet/>
-          <section>
-              <footer>
-                  <nav id="footer-nav">
-                      <ul>
-                          <li><a href="/faq"
-                                 onClick={(e) =>
-                                     handleButtonClick(e, "faq", "/Faq")}
-                          >FAQ</a></li>
-                          <li><a href="/contactus"
-                                 onClick={(e) =>
-                                     handleButtonClick(e, "contactus", "/Contactus")}
-                          >Contact Us</a></li>
-                          <li><a href="/privacypolicy"
-                                 onClick={(e) =>
-                                     handleButtonClick(e, "privacypolicy", "/Privacypolicy")}
-                          >Privacy Policy</a></li>
-                      </ul>
-                  </nav>
-                  <p id="footer-copyright">© 2024 CG Legal Tech, LLC</p>
-              </footer>
-          </section>
+          <Outlet context={{ handleLoginButtonClick }} />
+          <footer id="page-footer">
+              <nav id="footer-nav" class="page-content-container">
+                  <ul>
+                      <li id="footer-logo"></li>
+                      <li><a href="/faq"
+                              onClick={(e) =>
+                                  handleButtonClick(e, "faq", "/Faq")}
+                      >FAQ</a></li>
+                      <li><a href="/contactus"
+                              onClick={(e) =>
+                                  handleButtonClick(e, "contactus", "/Contactus")}
+                      >Contact Us</a></li>
+                      <li><a href="/privacypolicy"
+                              onClick={(e) =>
+                                  handleButtonClick(e, "privacypolicy", "/Privacypolicy")}
+                      >Privacy Policy</a></li>
+                      <li><a href="/terms"
+                              onClick={(e) =>
+                                  handleButtonClick(e, "terms", "/Terms")}
+                      >Terms & Conditions</a></li>
+                  </ul>
+              </nav>
+              <p id="footer-copyright">© 2025 CG Legal Technologies, LLC</p>
+          </footer>
           </div>
 
           {/* CustomAuth Dialog */}
