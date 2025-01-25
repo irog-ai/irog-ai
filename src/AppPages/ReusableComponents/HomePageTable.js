@@ -11,7 +11,7 @@ import { styled } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 
 const columns = [
-  { id: "Id", label: "ID", minWidth: 70 },
+  { id: "id", label: "ID", minWidth: 70 },
   {
     id: "FullName",
     label: "Full Name",
@@ -47,7 +47,7 @@ const columns = [
     format: (row) => {
       return (
         <Link to="/Case" state={{ selectedRow: row }}>
-          {row.CaseId}
+          {row.caseNumber}
         </Link>
       );
     },
@@ -100,7 +100,7 @@ export default function HomePageTable(props) {
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.Id}>
+                  <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (

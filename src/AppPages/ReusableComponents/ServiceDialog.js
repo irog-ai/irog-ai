@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import ServiceFileGenerator from "./ServiceFileWordGenerator";
 
-const ServiceDialog = ({ open, handleClose, data, handleDownload }) => {
+const ServiceDialog = ({ open, handleClose, data, handleDownload, lawyerId }) => {
   //   let data = {
   //     courtName: "",
   //     caseNumber: "",
@@ -212,7 +212,7 @@ const ServiceDialog = ({ open, handleClose, data, handleDownload }) => {
         {/* <Button onClick={() => handleDownload(formData)} color="primary">
           Download
         </Button> */}
-        <ServiceFileGenerator formData={formData} handleDownload={handleDownload} />
+        <ServiceFileGenerator formData={formData} handleDownload={handleDownload} lawyerId={lawyerId} />
       </DialogActions>
     </Dialog>
   );

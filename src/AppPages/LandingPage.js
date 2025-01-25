@@ -1,115 +1,96 @@
-import * as React from "react";
-import AddIcon from "@mui/icons-material/Add";
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { API } from "aws-amplify";
+import React, { useState, useEffect } from "react";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import Loading from "./ReusableComponents/Loading";
 import HomePageTable from "./ReusableComponents/HomePageTable";
-import Typography from "@mui/material/Typography";
 import FilterBar from "./ReusableComponents/FilterBar";
 import * as myConstClass from "../Util/Constants";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { withAuthenticator } from "@aws-amplify/ui-react";
-import Sidebar from "./ReusableComponents/Sidebar";
+import ShowExceptionDialog from "./ReusableComponents/UIComponents/ErrorComponent";
+import { fetchWithAuth } from "../Util/fetchWithAuth";
 
-import { Button, Grid, Box } from "@mui/material";
-
-const myAPI = "api";
-const path = "/getcases";
 
 function LandingPage({ signOut }) {
-  let initialState = {
+  const initialState = {
     rows: [],
     columns: [],
     tableData: [],
     filteredTabledata: [],
     isLoading: false,
     selectedFilter: "",
+    showExceptionDialog: false,
   };
+
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
-    setState({ ...state, isLoading: true });
+    setState((prevState) => ({ ...prevState, isLoading: true }));
     fetchData();
   }, []);
 
+  
   const fetchData = async () => {
-    //let customerId=1;
-    await API.get(myAPI, path, {
-      headers: {
-        "Content-Type": "text/plain",
-      },
-    })
-      .then((response) => {
-        console.log(response);
-        response.recordset.forEach((element) => {
-          if (element.Status.includes(",")) {
-            element.CancelQueue = element.Status;
-            element.Status = myConstClass.STATUS_CANCEL;
-          }
-        });
-        setState({
-          ...state,
-          tableData: response.recordset,
-          isLoading: false,
-          filteredTabledata: response.recordset,
-        });
-      })
-      .catch((error) => {
-        console.error(error);
+    try {
+      let apiFunctionPath = "cases/getCases";
+      const response = await fetchWithAuth(apiFunctionPath);
+      console.log(response);
+      response.forEach((element) => {
+        if (element.Status.includes(",")) {
+          element.CancelQueue = element.Status;
+          element.Status = myConstClass.STATUS_CANCEL;
+        }
       });
+      setState((prevState) => ({
+        ...prevState,
+        tableData: response,
+        isLoading: false,
+        filteredTabledata: response,
+      }));
+    } catch (error) {
+      setState((prevState) => ({
+        ...prevState,
+        tableData: [],
+        isLoading: false,
+        filteredTabledata: [],
+        showExceptionDialog: true,
+      }));      
+    }
   };
 
-  const filterTbaleData = (filterType) => {
-    let filteredTabledata = [];
-    switch (filterType) {
-      case myConstClass.STATUS_NEW:
-        filteredTabledata = state.tableData.filter(
-          (x) => x.Status === myConstClass.STATUS_NEW
-        );
-        break;
-      case myConstClass.STATUS_ATTESTED:
-        filteredTabledata = state.tableData.filter(
-          (x) => x.Status === myConstClass.STATUS_ATTESTED
-        );
-        break;
-      case myConstClass.STATUS_AWAITING:
-        filteredTabledata = state.tableData.filter(
-          (x) => x.Status === myConstClass.STATUS_AWAITING
-        );
-        break;
-      case myConstClass.STAUS_COMPLETE:
-        filteredTabledata = state.tableData.filter(
-          (x) => x.Status === myConstClass.STAUS_COMPLETE
-        );
-        break;
-      case myConstClass.STATUS_ALL:
-        filteredTabledata = state.tableData.filter((x) => x.Status !== null);
-        break;
-      case myConstClass.STATUS_CANCEL:
-        filteredTabledata = state.tableData.filter(
-          (x) => x.Status === myConstClass.STATUS_CANCEL
-        );
-        break;
-    }
-    setState({
-      ...state,
-      filteredTabledata: filteredTabledata,
-      selectedFilter: filterType,
+  const filterTableData = (filterType) => {
+    const filteredTabledata = state.tableData.filter((x) => {
+      switch (filterType) {
+        case myConstClass.STATUS_NEW:
+          return x.Status === myConstClass.STATUS_NEW;
+        case myConstClass.STATUS_ATTESTED:
+          return x.Status === myConstClass.STATUS_ATTESTED;
+        case myConstClass.STATUS_AWAITING:
+          return x.Status === myConstClass.STATUS_AWAITING;
+        case myConstClass.STAUS_COMPLETE:
+          return x.Status === myConstClass.STAUS_COMPLETE;
+        case myConstClass.STATUS_ALL:
+          return x.Status !== null;
+        case myConstClass.STATUS_CANCEL:
+          return x.Status === myConstClass.STATUS_CANCEL;
+        default:
+          return false;
+      }
     });
+
+    setState((prevState) => ({
+      ...prevState,
+      filteredTabledata,
+      selectedFilter: filterType,
+    }));
   };
 
   return (
-    <Box
-      //style={{ marginTop: "10%" }}
-      component="main"
-      sx={{ flexGrow: 1 }}
-    >
+    <Box component="main" sx={{ flexGrow: 1 }}>
+      {state.showExceptionDialog && <ShowExceptionDialog></ShowExceptionDialog>}
       {state.isLoading && <Loading />}
       <React.Fragment>
         <FilterBar
           tableData={state.tableData}
-          filterTbaleData={filterTbaleData}
+          filterTableData={filterTableData}
           selectedFilter={state.selectedFilter}
         />
         <Grid container alignItems="center">
@@ -132,7 +113,7 @@ function LandingPage({ signOut }) {
               style={{ display: "flex", justifyContent: "flex-end" }}
             >
               <Button
-                onClick={() => filterTbaleData(myConstClass.STATUS_ALL)}
+                onClick={() => filterTableData(myConstClass.STATUS_ALL)}
                 variant="text"
                 startIcon={<RefreshIcon />}
               >

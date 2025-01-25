@@ -35,7 +35,7 @@ export default function QuestionsTable(props) {
       format: (row) => {
         return (
           <Checkbox
-            checked={row.IsQuestionActive}
+            checked={row.IsActive}
             disabled={props.status !== myConstClass.STATUS_NEW}
             onChange={(e) => props.handleCheckboxChange(e.target.checked, row)}
           />
@@ -49,9 +49,19 @@ export default function QuestionsTable(props) {
       width: "20%",
     },
     {
-      id: "StandardQuestion",
+      id: "subQuestions",
       label: "Client Facing Question",
       width: "20%",
+      format:(row) => {
+        return (
+          <React.Fragment>
+            {row.subQuestions && row.subQuestions.map((question,index)=>{
+              return(
+              <p key={index}>{`${index+1}. ${question.Response}`}</p>)
+            })}
+          </React.Fragment>
+        )
+      }
     },
     {
       id: "MessageSent",
@@ -61,13 +71,13 @@ export default function QuestionsTable(props) {
       format: (row) => {
         return (
           <React.Fragment>
-            {props.emailChannelInitiated && row.IsQuestionActive && (
+            {props.emailChannelInitiated && row.IsActive && (
               <MarkEmailReadIcon
                 fontSize="small"
                 style={{ color: "green" }}
               ></MarkEmailReadIcon>
             )}
-            {(row.MsgSent && row.IsQuestionActive) && (
+            {row.MsgSent && row.IsActive && (
               <div style={{ margingLeft: "10px !important" }}>
                 <MessageIcon
                   fontSize="small"
@@ -113,6 +123,14 @@ export default function QuestionsTable(props) {
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const [allChecked, setAllChecked] = React.useState(true);
+
+  const handleAllCheckboxChange = (checked) => {
+    setAllChecked(checked);
+    props.rows.forEach((row) => {
+      props.handleCheckboxChange(checked, row);
+    });
+  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -129,15 +147,25 @@ export default function QuestionsTable(props) {
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              {columns.map((column) => (
-                <StyledTableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </StyledTableCell>
-              ))}
+              <StyledTableCell align="center">
+                <Checkbox
+                  checked={allChecked}
+                  onChange={(e) => handleAllCheckboxChange(e.target.checked)}
+                  disabled={props.status !== myConstClass.STATUS_NEW}
+                />
+              </StyledTableCell>
+              {columns.map((column, index) => {
+                if (column.id !== "IsActive")
+                  return (
+                    <StyledTableCell
+                      key={index}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
+                    >
+                      {column.label}
+                    </StyledTableCell>
+                  );
+              })}
             </TableRow>
           </TableHead>
           <TableBody>

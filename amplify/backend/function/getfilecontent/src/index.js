@@ -63,6 +63,7 @@ exports.handler = async (event) => {
     const options = {}; // You can customize the options if needed
     const data = await PDFParser(pdfBuffer, options);
     const plainText = data.text; // Extract plain text from the PDF file
+    console.log(plainText);
 
     //const plainText = pdf.text; // Extract plain text from the PDF file
 
@@ -73,9 +74,9 @@ exports.handler = async (event) => {
 
     // Call OpenAI's ChatGPT API
     const chatgptdata = {
-      model: "gpt-3.5-turbo",
+      model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
+      temperature: 1.0,
       max_tokens: 4000,
       top_p: 1,
       frequency_penalty: 0,

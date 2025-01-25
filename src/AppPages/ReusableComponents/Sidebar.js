@@ -115,7 +115,7 @@ function SidebarLayout() {
     {
       text: "Home",
       icon: <HomeIcon />,
-      onClick: () => navigate("/"),
+      onClick: () => navigate("/Landingpage"),
     },
     {
       text: "Add Case",

@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { CircularProgress, Box, Typography, Button } from "@mui/material";
+import axios from "axios";
 import { API, Auth } from "aws-amplify";
 import Loading from "./Loading"; // Ensure this imports your custom Loading component correctly
+import { fetchWithAuth } from "../../Util/fetchWithAuth";
+import { useNavigate } from "react-router-dom";
 
-const SubmitForm = ({ myAPI, myConstClass, state, setParentState }) => {
+const SubmitForm = ({ apipath, myConstClass, state, setParentState }) => {
   const [loadingState, setLoadingState] = useState({
     value: 0,
     loadingText: "",
     isLoading: false,
   });
+
+  const navigate = useNavigate();
 
   const resetLoadingState = () => {
     setLoadingState({
@@ -22,120 +27,105 @@ const SubmitForm = ({ myAPI, myConstClass, state, setParentState }) => {
     setLoadingState({
       isLoading: true,
       value: 10,
-      loadingText: "Creating case...",
+      loadingText: "Submitting case...",
     });
 
     try {
-      console.log(state.caseNumber);
       const user = await Auth.currentAuthenticatedUser();
-
-      // Populate formData
-      const formData = new FormData();
-      formData.append("loggedInuser", user.username);
-      formData.append("loggedInuseremail", user.attributes.email);
-      formData.append("FirstName", state.firstName);
-      formData.append("LastName", state.lastName);
-      formData.append("MiddleName", state.middleName);
-      formData.append("PhoneNumber", state.phoneNumber);
-      formData.append("EmailId", state.emailAddress);
-      formData.append("CaseId", state.caseNumber);
-      formData.append("serviceFileData",state.serviceFileData);
-      formData.append("s3BucketFileName", state.s3bucketfileName);
-      formData.append("s3BucketServiceFileName", state.s3BucketServiceFileName);
-      formData.append("Status", myConstClass.STATUS_NEW);
-      formData.append("selectedLawyerId", state.selectedLawyer);
-
-      // Step 1: Submit case
-      const response = await API.post(myAPI, "/submitcase", { body: formData });
-      console.log(response); 
-      const insertedId = response.caseId;
-      setLoadingState({
-        isLoading: true,
-        value: 40,
-        loadingText: "Inserting questions...",
+      const apiFunctionPath = "cases/submitcase";
+      const formData = {
+        LoggedInUser: user.username,
+        LoggedInUserEmail: user.attributes.email,
+        FirstName: state.firstName,
+        LastName: state.lastName,
+        MiddleName: state.middleName,
+        PhoneNumber: state.phoneNumber,
+        EmailId: state.emailAddress,
+        caseNumber: state.caseNumber==""?"test":state.caseNumber,
+        ServiceFileData: JSON.stringify(state.serviceFileData),
+        ServiceFileName: state.s3BucketFileName,
+        s3BucketServiceFileName: state.s3BucketServiceFileName,
+        Status: myConstClass.STATUS_NEW,
+        LawyerId: state.LawyerId,
+        questions: state.questions,
+      };
+      console.log(formData);
+      //const response = await axios.post(`${apipath}${apiFunctionPath}`, formData);
+      const response =  await fetchWithAuth(apiFunctionPath, {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: formData, // Assuming `form` is the data to be sent
       });
+      console.log(response); // Ensure you log the correct response object
+      const insertedId = response.caseId || response.insertedId;
+      const questions = response.insertedQuestions || [];
 
-      // Step 2: Insert questions
-      const insertObj = state.questions.map((question, index) => [
-        insertedId,
-        question,
-        index+1,
-      ]);
-      formData.append("insertObj", JSON.stringify(insertObj));
-      await API.post(myAPI, "/insertquestions", { body: formData });
-
-      setLoadingState({
-        isLoading: true,
-        value: 70,
-        loadingText: "Retrieving questions...",
-      });
-
-      // Step 3: Get questions
-      const resultset = await API.get(myAPI, `/getQuestions/${insertedId}`);
-      const insertedQuestions = resultset.recordsets[1];
-
-      setLoadingState({
-        isLoading: true,
-        value: 90,
-        loadingText: "Performing ChatGPT call...",
-      });
-
-      // Step 4: Call ChatGPT asynchronously
-      API.get(myAPI, `/Chatgptcall/${insertedId}`);
-
-      resetLoadingState();
-
+      //Assume the ChatGPT call is done asynchronously in the backend.
       setParentState({
-        insertedQuestions: insertedQuestions,
-        questionTable: insertedQuestions,
+        insertedQuestions: questions,
+        questionTable: questions,
         showTable: true,
         insertedId: insertedId,
         caseId: insertedId,
         status: myConstClass.STATUS_NEW,
       });
+
+      navigate("/Case", {
+        state: { selectedRow: { id: insertedId } },
+      });
+
+      
+
+      resetLoadingState();
     } catch (error) {
       console.error("Error during submission:", error);
-      resetLoadingState(); // Ensure loading state is reset on error
+      resetLoadingState();
     }
   };
+
   const styles = {
     container: {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 7000, // Ensure the CircularProgress is above other elements
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      },
-      backdrop: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(255, 255, 255, 0.5)', // Adjust the opacity
-        zIndex: 6999, // Set a lower z-index for the backdrop
-        backdropFilter: 'blur(5px)', // Apply blur effect here
-      },
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      zIndex: 7000, // Ensure the CircularProgress is above other elements
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    backdrop: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(255, 255, 255, 0.5)", // Adjust the opacity
+      zIndex: 6999, // Set a lower z-index for the backdrop
+      backdropFilter: "blur(5px)", // Apply blur effect here
+    },
   };
 
   return (
     <Box>
       {loadingState.isLoading && (
         <Box>
-        <div style={styles.backdrop} />
-        <div style={styles.container}>
-          <CircularProgress
-            variant="determinate"
-            value={loadingState.value}
-          />
-          <Typography variant="body2" style={{ marginTop: '10px', color: 'black' }}>
-            {loadingState.loadingText}
-          </Typography>
-        </div>
-      </Box>
+          <div style={styles.backdrop} />
+          <div style={styles.container}>
+            <CircularProgress
+              variant="determinate"
+              value={loadingState.value}
+            />
+            <Typography
+              variant="body2"
+              style={{ marginTop: "10px", color: "black" }}
+            >
+              {loadingState.loadingText}
+            </Typography>
+          </div>
+        </Box>
       )}
       <Button
         variant="contained"

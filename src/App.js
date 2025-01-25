@@ -22,9 +22,6 @@ import Layout from "./AppPages/LandingPage/Layout";
 import Contactus from "./AppPages/Contactus";
 import LawyerInfo from "./AppPages/LawyerInfo";
 import CustomSignIn from "./AppPages/ReusableComponents/CustomSignin";
-import CustomSignUp from "./AppPages/ReusableComponents/CustomSignUp";
-import Drawer from "./AppPages/ReusableComponents/Drawer";
-import styles from "./App.css";
 import Sidebar from "./AppPages/ReusableComponents/Sidebar";
 import ProtectedRoute from "./AppPages/ReusableComponents/ProtectedRoute";
 import UnauthorizedPage from "./AppPages/ReusableComponents/Unauthorized";
@@ -45,7 +42,7 @@ function App() {
           <Route path="privacypolicy" element={<PrivacyPolicy />} />
           <Route path="contactus" element={<Contactus />} />
           <Route path="/signin" element={<CustomSignIn />} />
-            <Route path="/signup" element={<CustomSignUp />} />
+            {/* <Route path="/signup" element={<CustomSignUp />} /> */}
         </Route>
         <Route element={<Sidebar />}>
           <Route path="Case" element={<ProtectedRoute><Home /></ProtectedRoute>} />

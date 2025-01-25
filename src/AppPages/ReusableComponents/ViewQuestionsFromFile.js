@@ -8,28 +8,60 @@ import {
   ListItem,
   ListItemText,
   Button,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 
 const ViewQuestions = ({ open, onClose, questions }) => {
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      aria-labelledby="questions-dialog-title"
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+      maxWidth="md"
+      fullWidth
     >
-      <DialogTitle id="questions-dialog-title">Questions List</DialogTitle>
+      <DialogTitle>
+        Questions from File
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
       <DialogContent>
         <List>
           {questions.map((question, index) => (
-            <ListItem key={index}>
-              <ListItemText primary={index+1 + ")  " + question} />
-            </ListItem>
+            <React.Fragment key={index}>
+              <ListItem>
+                <ListItemText 
+                  primary={`${index + 1}) ${question.question || question}`}
+                  sx={{ fontWeight: 'bold' }}
+                />
+              </ListItem>
+              {question.subQuestions && question.subQuestions.length > 0 && (
+                <List sx={{ pl: 4 }}>
+                  {question.subQuestions.map((subQ, subIndex) => (
+                    <ListItem key={`${index}-${subIndex}`}>
+                      <ListItemText 
+                        primary={`${String.fromCharCode(97 + subIndex)}) ${subQ}`}
+                        sx={{ fontSize: '0.9em' }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </React.Fragment>
           ))}
         </List>
       </DialogContent>
-      <Button onClick={onClose} color="primary">
-        Close
-      </Button>
     </Dialog>
   );
 };

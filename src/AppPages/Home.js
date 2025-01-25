@@ -1,5 +1,7 @@
-import * as React from "react";
+ import * as React from "react";
 import { useState, useEffect } from "react";
+import axios from "axios";
+import { fetchWithAuth } from "../Util/fetchWithAuth";
 import { json, useLocation, useNavigate } from "react-router-dom";
 
 // Material-UI Components
@@ -45,9 +47,13 @@ import Loading from "./ReusableComponents/Loading";
 import StatusStepper from "./ReusableComponents/StatusStepper";
 import CancelDialog from "./ReusableComponents/CancelDialog";
 import CompleteDialog from "./ReusableComponents/CompleteDialog";
-import WordGenerator from "./ReusableComponents/WordGenerator";
+import DocumentGenerator from "./ReusableComponents/WordGenerator";
+import ShowExceptionDialog from "./ReusableComponents/UIComponents/ErrorComponent";
+import ServiceFileGenerator from "./ReusableComponents/ServiceFileWordGenerator";
+import { RttRounded } from "@mui/icons-material";
 
 const myAPI = "api";
+const apipath = process.env.REACT_APP_API_URL;
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
@@ -64,7 +70,7 @@ function Home({ signOut }) {
     middleName: "",
     lastName: "",
     emailAddress: "",
-    selectedLawyer: "",
+    LawyerId: "",
     LawyersList: [],
     inpFile: "",
     serviceFile: "",
@@ -73,19 +79,19 @@ function Home({ signOut }) {
     inpFileName: "",
     questions: [],
     isLoading: false,
-    serviceFileData:{
+    serviceFileData: {
       courtName: "",
       caseNumber: "",
-      propundingPartyRole:"",
-      propundingPartyNames:[],
-      respondingPartyRole:"",
-      respondingPartyNames:[],
+      propundingPartyRole: "",
+      propundingPartyNames: [],
+      respondingPartyRole: "",
+      respondingPartyNames: [],
       division: "",
       noticeHeading: "",
       noticeMatter: "",
-      lawyersJson:{},
+      lawyersJson: {},
       certificateText: "",
-      interrogatoryFileTitle:""
+      interrogatoryFileTitle: "",
     },
     cancelQueue: "",
     emailSent: false,
@@ -117,99 +123,120 @@ function Home({ signOut }) {
     showChatDiaolog: false,
     responseFileName: "",
     responseAttorneyFileName: "",
-    serviceDialogOpen:false,
+    serviceDialogOpen: false,
+    showExceptionDialog: false,
   };
   const [state, setState] = useState(initialState);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if location.state and location.state.selectedRow are defined.
     if (
       location.state !== undefined &&
       location.state !== null &&
       location.state.selectedRow !== null &&
       selectedRow !== null
     ) {
+      // Destructure selectedRow from location.state.
       let { selectedRow } = location.state;
       setState({ ...state, isLoading: true });
-      let path = "/getQuestions";
-      let tableData = [];
-      let menuItemList = [];
-      menuItemList.push(
-        <MenuItem value={selectedRow.LawyerId}>{selectedRow.Lawyer}</MenuItem>
-      );
 
-      console.log(selectedRow); // output: "the-page-id"
-      async function getData() {
-        const formData = new FormData();
-        console.log(selectedRow.Id);
-        formData.append("insertedId", selectedRow.Id.toString());
-        await API.get(myAPI, path + "/" + selectedRow.Id, {
-          headers: {
-            "Content-Type": "text/plain",
-          },
-        }).then(async (response) => {
-          console.log(response);
-          tableData = await response.recordsets[1];
-          selectedRow = response.recordsets[0][0];
-        });
-        console.log(selectedRow.ServiceFileData);
-        setState({
-          ...state,
-          questionTable: tableData,
-          firstName: selectedRow.FirstName,
-          lastName: selectedRow.LastName,
-          middleName: selectedRow.MiddleName,
-          phoneNumber: selectedRow.PhoneNumber,
-          emailAddress: selectedRow.EmailId,
-          s3bucketfileName: selectedRow.s3BucketFileName,
-          createCasePage: false,
-          caseId: selectedRow.Id,
-          caseNumber: selectedRow.CaseId,
-          serviceFileData: selectedRow.ServiceFileData!==undefined?JSON.parse(selectedRow.ServiceFileData):state.serviceFileData,
-          isLoading: false,
-          status: selectedRow.Status.includes(",")
-            ? myConstClass.STATUS_CANCEL
-            : selectedRow.Status,
-          cancelQueue: selectedRow.Status.includes(",")
-            ? selectedRow.Status
-            : "",
-          emailChannelInitiated:
-            selectedRow.EmailInitiated === null ? false : true,
-          chatInitiatedForCase:
-            selectedRow.ChatInitiated === null ? false : true,
-          responseFileName: selectedRow.ResponseFileName,
-          responseAttorneyFileName: selectedRow.ResponseAttorneyFileName,
-          selectedLawyer: selectedRow.LawyerId,
-          LawyersList: menuItemList,
-        });
+      // Define API paths.
+      const getCaseDetailsPath = `cases/getCaseById/${selectedRow.id}`;
+      const getQuestionsPath = `questions/getQuestions/${selectedRow.id}`;
+
+      // Async function to fetch data.
+      async function fetchData() {
+        try {
+          // Fetch the latest case details.
+          //const caseResponse = await axios.get(`${apipath}${getCaseDetailsPath}`);
+          const caseResponse = await fetchWithAuth(getCaseDetailsPath);
+          const latestCaseDetails = caseResponse;
+
+          // Fetch the questions based on the latest case details.
+          const questionsResponse = await fetchWithAuth(getQuestionsPath);
+          console.log(questionsResponse);
+          const tableData = questionsResponse;
+
+          // Create menu items based on the latest data.
+          let menuItemList = [];
+          menuItemList.push(
+            <MenuItem
+              key={latestCaseDetails.LawyerId}
+              value={latestCaseDetails.LawyerId}
+            >
+              {latestCaseDetails.lawyerFirstName +
+                latestCaseDetails.lawyerLastName}
+            </MenuItem>
+          );
+
+          // Update the state with the latest data.
+          setState({
+            ...state,
+            questionTable: tableData,
+            firstName: latestCaseDetails.FirstName,
+            lastName: latestCaseDetails.LastName,
+            middleName: latestCaseDetails.MiddleName,
+            phoneNumber: latestCaseDetails.PhoneNumber,
+            emailAddress: latestCaseDetails.EmailId,
+            s3bucketfileName: latestCaseDetails.s3BucketFileName,
+            createCasePage: false,
+            caseId: latestCaseDetails.id,
+            caseNumber: latestCaseDetails.caseNumber,
+            serviceFileData:
+              latestCaseDetails.ServiceFileData !== undefined
+                ? JSON.parse(latestCaseDetails.ServiceFileData)
+                : state.serviceFileData,
+            isLoading: false,
+            status: latestCaseDetails.Status.includes(",")
+              ? myConstClass.STATUS_CANCEL
+              : latestCaseDetails.Status,
+            cancelQueue: latestCaseDetails.Status.includes(",")
+              ? latestCaseDetails.Status
+              : "",
+            emailChannelInitiated:
+              latestCaseDetails.EmailInitiated === null ? false : true,
+            chatInitiatedForCase:
+              latestCaseDetails.ChatInitiated === null ? false : true,
+            responseFileName: latestCaseDetails.ResponseFileName,
+            responseAttorneyFileName:
+              latestCaseDetails.ResponseAttorneyFileName,
+            LawyerId: latestCaseDetails.LawyerId,
+            LawyersList: menuItemList,
+          });
+        } catch (error) {
+          console.log(error);
+          setState({ ...state, isLoading: false, showExceptionDialog: true });
+        }
       }
-      getData();
+
+      // Call the fetch data function.
+      fetchData();
     } else {
       getLawyersList();
     }
   }, []);
 
+  const showExceptionOnPage = () => {
+    setState({ ...state, showExceptionDialog: true });
+  };
+
   const getLawyersList = async () => {
-    console.log("Lawyers method");
     let menuItemList = [];
-    // menuItemList.push(
-    //   <MenuItem value="">
-    //     <em>None</em>
-    //   </MenuItem>
-    // );
-    const path = "/getLawyers";
-    const response = await API.get(
-      myAPI,
-      path + "/" + state.caseId + "-" + myConstClass.STATUS_AWAITING
-    );
-    //.then(async (response) => {
-    console.log(response);
-    const data = await response.recordsets[0];
-    console.log(data);
+    let data = [];
+    const apiFunctionPath = "lawyers/getLawyers";
+    try {
+      const response = await fetchWithAuth(apiFunctionPath);
+      data = response;
+    } catch (error) {
+      console.error("Error fetching lawyers:", error);
+      setState({ ...state, isLoading: false, showExceptionDialog: true });
+      //throw(error);
+    }
     menuItemList = data.length ? (
       data.map((x) => (
-        <MenuItem key={x.Id} value={x.Id}>
-          {x.FirstName + " " + x.LastName}
+        <MenuItem key={x.id} value={x.id}>
+          {x.firstName + " " + x.lastName}
         </MenuItem>
       ))
     ) : (
@@ -218,7 +245,7 @@ function Home({ signOut }) {
       </MenuItem>
     );
 
-    console.log(menuItemList);
+    //console.log(menuItemList);
     setState((prevState) => ({
       ...prevState,
       LawyersList: menuItemList,
@@ -238,75 +265,118 @@ function Home({ signOut }) {
 
   const SendWebLink = async () => {
     setState({ ...state, isLoading: true });
-    let subject = "ACTION REQUIRED: " + state.caseNumber + " Response form";
-    console.log(state.caseId);
-    console.log(state.caseNumber);
-    const key =
-      (state.caseId !== null && state.caseId !== ""
-        ? state.caseId
-        : state.insertedId) +
-      "-" +
-      state.caseNumber.split(" ").join("");
-    console.log(process.env.FORM_LINK);
-    const body = `https://main.d2juc4bptwol87.amplifyapp.com/submit/${key}`;
-    console.log(body);
-    const path = "/email";
-    const formData = new FormData();
-    formData.append("emailAddress", state.emailAddress);
-    formData.append("subject", subject);
-    formData.append("message", body.toString());
-    formData.append("usebody", false);
 
-    const result = await API.post(myAPI, path, {
-      headers: {
-        "content-type": "multipart/form-data",
-      },
-      body: formData,
-    }).then(async () => {
-      if (!state.emailChannelInitiated) {
-        const path = "/caseStatusUpdate";
-        await API.get(
-          myAPI,
-          path + "/" + state.caseId + "-" + myConstClass.STATUS_AWAITING
-        ).then(async (response) => {
-          console.log(response);
-          const result = await response;
-        });
+    try {
+      const apiFunctionPath = "email/sendWebLink"; // Path to your express API method
+
+      const requestBody = {
+        caseId: state.caseId || state.insertedId,
+        caseNumber: state.caseNumber,
+        emailAddress: state.emailAddress,
+        emailChannelInitiated: state.emailChannelInitiated,
+      };
+
+      // Send POST request to the Node.js API
+      // const result = await axios.post(`${apipath}${path}`, requestBody, {
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      // });
+
+      const result = await fetchWithAuth(apiFunctionPath, {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: requestBody, // Assuming `form` is the data to be sent
+      });
+
+      if (result) {
+        // Assuming your API returns a success message
+        console.log(result.message);
       }
-    });
-    setState({
-      ...state,
-      emailSent: true,
-      isLoading: false,
-      status: myConstClass.STATUS_AWAITING,
-      emailChannelInitiated: true,
-    });
+
+      setState({
+        ...state,
+        emailSent: true,
+        isLoading: false,
+        status: myConstClass.STATUS_AWAITING,
+        emailChannelInitiated: true,
+      });
+    } catch (error) {
+      console.error("Error sending web link:", error);
+      setState({ ...state, isLoading: false, showExceptionDialog: true });
+    }
   };
+
+  // const SendWebLink = async () => {
+  //   setState({ ...state, isLoading: true });
+  //   let subject = "ACTION REQUIRED: " + state.caseNumber + " Response form";
+  //   console.log(state.caseId);
+  //   console.log(state.caseNumber);
+  //   const key =
+  //     (state.caseId !== null && state.caseId !== ""
+  //       ? state.caseId
+  //       : state.insertedId) +
+  //     "-" +
+  //     state.caseNumber.split(" ").join("");
+  //   console.log(process.env.FORM_LINK);
+  //   const body = `https://main.d2juc4bptwol87.amplifyapp.com/submit/${key}`;
+  //   console.log(body);
+  //   const path = "/email";
+  //   const formData = new FormData();
+  //   formData.append("emailAddress", state.emailAddress);
+  //   formData.append("subject", subject);
+  //   formData.append("message", body.toString());
+  //   formData.append("usebody", false);
+
+  //   const result = await API.post(myAPI, path, {
+  //     headers: {
+  //       "content-type": "multipart/form-data",
+  //     },
+  //     body: formData,
+  //   }).then(async () => {
+  //     if (!state.emailChannelInitiated) {
+  //       //const path = "/caseStatusUpdate";
+  //       await axios
+  //         .put(
+  //           `${apipath}cases/updateCase/${state.caseId}/${myConstClass.STATUS_AWAITING}`
+  //         )
+  //         .catch((error) => {
+  //           console.log(error);
+  //           setState({ ...state, isLoading: true, showExceptionDialog: true });
+  //         });
+  //     }
+  //   });
+  //   setState({
+  //     ...state,
+  //     emailSent: true,
+  //     isLoading: false,
+  //     status: myConstClass.STATUS_AWAITING,
+  //     emailChannelInitiated: true,
+  //   });
+  // };
 
   const refresh = async () => {
     setState({ ...state, isLoading: true });
     const formData = new FormData();
-    let path = "/getQuestions";
+    let path = "questions/getQuestions";
     formData.append(
       "insertedId",
       state.insertedId === 0 ? state.caseId : state.insertedId
     );
     console.log(state.insertedId === 0 ? state.caseId : state.insertedId);
     let questions = [];
-
-    await API.get(
-      myAPI,
-      path + "/" + (state.insertedId === 0 ? state.caseId : state.insertedId),
-      {
-        headers: {
-          "Content-Type": "text/plain",
-        },
-      }
-    ).then(async (response) => {
-      console.log(response);
-      questions = await response.recordsets[1];
-      console.log(questions);
-    });
+    let id = state.insertedId === 0 ? state.caseId : state.insertedId;
+    const apiFunctionPath = `${path}/${id}`;
+    await fetchWithAuth(apiFunctionPath)
+      .then(async (response) => {
+        questions = await response;
+      })
+      .catch((error) => {
+        console.log(error);
+        setState({ ...state, isLoading: false, showExceptionDialog: true });
+      });
     setState({ ...state, questionTable: questions, isLoading: false });
   };
 
@@ -371,15 +441,20 @@ function Home({ signOut }) {
     }
   };
 
-  const handleDownload = async (filename, updateState, isAttorneyDoc) => {
+  const handleDownload = async (filename, updateState, docType) => {
     try {
       const response = await Storage.get(filename);
       console.log(response);
       if (updateState) {
-        if (isAttorneyDoc) {
-          setState({ ...state, responseAttorneyFileName: filename });
-        } else {
-          setState({ ...state, responseFileName: filename });
+        switch (docType) {
+          case "AttorneyResponsesDoc":
+            setState({ ...state, responseAttorneyFileName: filename });
+            break;
+          case "ClientResponsesDoc":
+            setState({ ...state, responseFileName: filename });
+            break;
+          case "ServiceFile":
+            setState({ ...state, serviceFileName: filename });
         }
       }
       window.open(response); // Open the file URL in a new tab for download
@@ -388,75 +463,178 @@ function Home({ signOut }) {
     }
   };
 
+  const setPartyRolesNames = (json) => {
+    // Initialize arrays to hold names for each role
+    const propoundingPartyNames = [];
+    const respondingPartyNames = [];
+  
+    // Determine the roles
+    const propoundingRole = json.propoundingPartyRole.toLowerCase();
+    const respondingRole = json.respondingPartyRole.toLowerCase();
+  
+    // Iterate over the style array to extract names based on roles
+    json.style.forEach(party => {
+      if (party.role.toLowerCase() === propoundingRole) {
+        propoundingPartyNames.push(party.name);
+      }
+      if (party.role.toLowerCase() === respondingRole) {
+        respondingPartyNames.push(party.name);
+      }
+    });
+  
+    // Update the JSON object with comma-separated names
+    json.propoundingPartyNames = propoundingPartyNames.join(', ');
+    json.respondingPartyNames = respondingPartyNames.join(', ');
+  
+    return json;
+  };
+  
+
   const handleServiceFileChange = async (event) => {
     if (state.serviceFile !== "") {
       deleteFile(state.serviceFile, state.s3BucketServiceFileName);
+      setState({
+        ...state,
+        serviceFile: "",
+        s3BucketServiceFileName: "",
+        serviceFileName: "",
+        serviceFileData: "",
+        caseNumber: "",
+      });
     }
-
+    if (event.target.files.length === 0) return;
     const path = "/getfilecontent";
     const file = event.target.files[0];
+
     let resp;
     const filename = Date.now() + "-" + file.name.replace(/ /g, "");
     setState({ ...state, isLoading: true });
 
     await uploadFile(file, filename).then(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2-second delay
-      await API.get(myAPI, path + "/" + filename + "IsServiceFile", {
-        headers: {
-          "Content-Type": "text/plain",
-        },
-      }).then((response) => {
-        console.log(response);
-        let jsonResponse = response;
-        jsonResponse={...jsonResponse,interrogatoryFileTitle:state.serviceFileData.interrogatoryFileTitle }
-        
-        setState({
-          ...state,
-          serviceFile: file,
-          s3BucketServiceFileName: filename,
-          serviceFileName: file.name,
-          caseNumber: jsonResponse.caseNumber === 'not found' ? "" : jsonResponse.caseNumber,
-          isLoading: false,
-          serviceFileData : jsonResponse
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // 2-second delay
+      const functionpath = `file/processPdf/${filename + "IsServiceFile"}`;
+      await fetchWithAuth(functionpath)
+        //.get(`${apipath}file/processPdf/${filename + "IsServiceFile"}`)
+        .then((response) => {
+          console.log(response);
+          let jsonResponse = response.questions;
+          jsonResponse = jsonResponse.replace("```json", "");
+          jsonResponse = jsonResponse.replace("```", "");
+          jsonResponse = JSON.parse(jsonResponse);
+          jsonResponse = setPartyRolesNames(jsonResponse)
+          jsonResponse = {
+            ...jsonResponse,
+            interrogatoryFileTitle:
+              state.serviceFileData.interrogatoryFileTitle,
+            remainingContent: state.serviceFileData.remainingContent,
+          };
+          console.log(JSON.stringify(jsonResponse));
+          setState({
+            ...state,
+            serviceFile: file,
+            s3BucketServiceFileName: filename,
+            serviceFileName: file.name,
+            caseNumber:
+              jsonResponse.caseNumber === "not found"
+                ? ""
+                : jsonResponse.caseNumber,
+            isLoading: false,
+            serviceFileData: jsonResponse,
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+          setState({ ...state, isLoading: false, showExceptionDialog: true });
         });
-      });
     });
+  };
+
+  const removeFile = (type) => {
+    if (type === "Interrogatory") {
+      if (state.inpFile !== "") {
+        deleteFile(state.inpFile, state.s3bucketfileName);
+      }
+      setState({
+        ...state,
+        inpFile: "",
+        s3bucketfileName: "",
+        inpFileName: "",
+        questions: "",
+        serviceFileData: { ...state.serviceFileData },
+      });
+    } else if (type === "Servicefile") {
+      if (state.serviceFile !== "") {
+        deleteFile(state.serviceFile, state.s3BucketServiceFileName);
+      }
+      setState({
+        ...state,
+        serviceFile: "",
+        s3BucketServiceFileName: "",
+        serviceFileName: "",
+        serviceFileData: "",
+        caseNumber: "",
+      });
+    }
   };
 
   const handleFileChange = async (event) => {
     if (state.inpFile !== "") {
       deleteFile(state.inpFile, state.s3bucketfileName);
+      setState((prevState) => ({
+        ...prevState,
+        inpFile: null,
+        inpFileName: "",
+        serviceFileData: { ...state.serviceFileData },
+        questions: [],
+      }));
     }
 
-    const path = "/getfilecontent";
+    if (event.target.files.length === 0) return;
+
     const file = event.target.files[0];
     let resp;
-    let  serviceFileData={...state.serviceFileData};
+    let serviceFileData = {};
     const filename = Date.now() + "-" + file.name.replace(/ /g, "");
     setState({ ...state, isLoading: true });
 
-
     await uploadFile(file, filename).then(async () => {
-      console.log(file);
-
       // Adding a delay to ensure the file is available in the S3 bucket
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2-second delay
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // 2-second delay
       const myArray = [];
-      await API.get(myAPI, path + "/" + filename, {
-        headers: {
-          "Content-Type": "text/plain",
-        },
-      }).then((response) => {
-        console.log(response);
-        resp = response.questions;
-        serviceFileData={...state.serviceFileData,interrogatoryFileTitle:resp.fileTitle};
-        const questionPattern = /(\d{1,2}[).]\s)((?:(?!\d{1,2}[).]\s).|\n)+)/g;
-        let match;
-        while ((match = questionPattern.exec(resp)) !== null) {
-          myArray.push(match[2].trim()); // Only push the question text without the number
-        }
-        console.log(myArray);
-      });
+      const functionPath = `file/processPdf/${filename}`;
+      await fetchWithAuth(functionPath)
+        .then((response) => {
+          //console.log(response);
+          //resp = response.questions;
+          let jsonData = response.questions.replace("```json", "");
+          jsonData = jsonData.replace("```", "");
+          console.log(jsonData);
+          resp = JSON.parse(jsonData);
+          console.log(resp);
+          serviceFileData = {
+            ...state.serviceFileData,
+            interrogatoryFileTitle: resp.fileTitle,
+            remainingContent: resp.remainingContent,
+          };
+          const questionPattern = /^(\d{1,2}[).]\s)?(.*)/;
+          const questionsArray = resp.questions;
+
+          questionsArray.forEach((question) => {
+            const match = questionPattern.exec(question);
+            if (match) {
+              myArray.push((match[2] || match[0]).trim());
+            } else {
+              console.warn(`Unexpected question format: ${question}`);
+              myArray.push(question.trim());
+            }
+          });
+
+          console.log(myArray);
+        })
+        .catch((error) => {
+          console.log(error);
+          setState({ ...state, showExceptionDialog: true, isLoading: false });
+        });
 
       setState({
         ...state,
@@ -465,7 +643,7 @@ function Home({ signOut }) {
         inpFileName: file.name,
         s3bucketfileName: filename,
         isLoading: false,
-        serviceFileData: serviceFileData
+        serviceFileData: serviceFileData,
       });
     });
   };
@@ -474,7 +652,6 @@ function Home({ signOut }) {
     navigate("/Landingpage");
   };
 
-  
   const setParentState = ({ insertedQuestions, insertedId }) => {
     setState({
       ...state,
@@ -493,45 +670,46 @@ function Home({ signOut }) {
     const row = tempTabledata.find(
       (row) => row.SequenceNumber === changedRow.SequenceNumber
     );
-    row.IsQuestionActive = value;
+    row.IsActive = value;
     setState({ ...state, questionTable: tempTabledata });
   };
 
   const handleAttestation = async () => {
-    setState({ ...state, isLoading: true });
-    const path = "/caseStatusUpdate";
-    await API.get(
-      myAPI,
-      path + "/" + state.caseId + "-" + myConstClass.STATUS_ATTESTED
-    ).then(async (response) => {
-      console.log(response);
-      const inactiveQuestionsCount = state.questionTable.filter(
-        (question) => !question.IsQuestionActive
-      ).length;
-      if (inactiveQuestionsCount) {
-        const path1 = "/updateQuestions";
-        const formData = new FormData();
-        formData.append("data", JSON.stringify(state.questionTable));
-        await API.post(myAPI, path1, { body: formData }).then(() => {});
-      }
-    });
-    setState({
-      ...state,
-      showAttestDialog: false,
-      isLoading: false,
-      status: myConstClass.STATUS_ATTESTED,
-    });
+    try {
+      setState({ ...state, isLoading: true });
+      const formData = { data: JSON.stringify(state.questionTable) };
+      const apiFunctionPath = `questions/updateQuestionsAndCase/${state.caseId}/${myConstClass.STATUS_ATTESTED}`;
+
+      await fetchWithAuth(apiFunctionPath, {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: formData, // Assuming `form` is the data to be sent
+      });
+
+      //console.log(response.data);
+
+      // Optionally update state based on response
+      setState({
+        ...state,
+        showAttestDialog: false,
+        isLoading: false,
+        status: myConstClass.STATUS_ATTESTED,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      setState({ ...state, isLoading: false, showExceptionDialog: true });
+    }
   };
 
   const handleComplete = async () => {
     setState({ ...state, isLoading: true });
-    const path = "/caseStatusUpdate";
-    await API.get(
-      myAPI,
-      path + "/" + state.caseId + "-" + myConstClass.STAUS_COMPLETE
-    ).then(async (response) => {
-      console.log(response);
-      const result = await response;
+    const apiFuntionpath = `cases/updateCase/${state.caseId}/${myConstClass.STAUS_COMPLETE}`;
+
+    await fetchWithAuth(apiFuntionpath, { method: "put" }).catch((error) => {
+      console.error("Error:", error);
+      setState({ ...state, isLoading: false, showExceptionDialog: true });
     });
     setState({
       ...state,
@@ -570,13 +748,11 @@ function Home({ signOut }) {
           "," +
           myConstClass.STATUS_CANCEL;
     }
-    const path = "/caseStatusUpdate";
-    await API.get(myAPI, path + "/" + state.caseId + "-" + cancelQueue).then(
-      async (response) => {
-        console.log(response);
-        const result = await response;
-      }
-    );
+    const apiFunctionPath = `cases/updateCase/${state.caseId}/${cancelQueue}`;
+    await fetchWithAuth(apiFunctionPath, { method: "put" }).catch((error) => {
+      console.error("Error:", error);
+      setState({ ...state, isLoading: false, showExceptionDialog: true });
+    });
     setState({
       ...state,
       cancelConfirmation: false,
@@ -601,7 +777,7 @@ function Home({ signOut }) {
   };
 
   const handleServiceDialogClose = () => {
-    setState({...state, serviceDialogOpen:false});
+    setState({ ...state, serviceDialogOpen: false });
   };
 
   const handleDialogClose = () => {
@@ -655,7 +831,8 @@ function Home({ signOut }) {
 
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
-      {/* <Sidebar signOut={signOut} /> */}
+      {state.showExceptionDialog && <ShowExceptionDialog />}
+      
       {state.isLoading && <Loading />}
       <ViewResponseDialog
         open={state.showResponsesDialog}
@@ -800,9 +977,9 @@ function Home({ signOut }) {
                   <InputLabel id="lawyer-select-label">Lawyer</InputLabel>
                   <Select
                     labelId="lawyer-select-label"
-                    id="lawyerId"
-                    name="selectedLawyer"
-                    value={state.selectedLawyer}
+                    id="LawyerId"
+                    name="LawyerId"
+                    value={state.LawyerId}
                     onChange={handleChange}
                     label="Lawyer" // Ensures the label is associated with the Select component
                     displayEmpty
@@ -834,9 +1011,13 @@ function Home({ signOut }) {
                       variant="outlined"
                       onClick={showAttestDialog}
                       disabled={
-                        state.questionTable.filter(
-                          (x) => x.StandardQuestion === null
-                        ).length > 0 || state.status !== myConstClass.STATUS_NEW
+                        !state.questionTable.every(
+                          (x) => x.subQuestions && x.subQuestions.length > 1
+                        ) || 
+                        state.questionTable.every(
+                          (x) => !x.IsActive
+                        ) ||
+                        state.status !== myConstClass.STATUS_NEW
                       }
                       startIcon={
                         state.status !== myConstClass.STATUS_NEW && (
@@ -926,8 +1107,7 @@ function Home({ signOut }) {
                       disabled={
                         state.questionTable.filter(
                           (x) =>
-                            x.OriginalAnswer === null &&
-                            x.IsQuestionActive === true
+                            x.OriginalAnswer === null && x.IsActive === true
                         ).length > 0 ||
                         state.status === myConstClass.STATUS_CANCEL ||
                         state.status === myConstClass.STAUS_COMPLETE
@@ -1002,7 +1182,25 @@ function Home({ signOut }) {
                       />
                     </React.Fragment>
                   )}
+                  {state.inpFileName && (
+                    <Button
+                      variant="text"
+                      color="primary"
+                      style={{ marginLeft: "10px" }}
+                      onClick={() => removeFile("Interrogatory")}
+                    >
+                      CLEAR FILE
+                    </Button>
+                  )}
                 </Grid>
+                {state.inpFileName && state.questions.length === 0 && (
+                  <Typography
+                    style={{ marginLeft: "10px", color: "orangered" }}
+                  >
+                    There seem to be no questions in the file you uploaded.
+                    Please verify and upload the file again.
+                  </Typography>
+                )}
                 <Grid
                   item
                   xs={12}
@@ -1036,6 +1234,16 @@ function Home({ signOut }) {
                       ? state.serviceFileName + " uploaded"
                       : ""}
                   </label>
+                  {state.serviceFileName && (
+                    <Button
+                      variant="text"
+                      color="primary"
+                      style={{ marginLeft: "10px" }}
+                      onClick={() => removeFile("Servicefile")}
+                    >
+                      CLEAR FILE
+                    </Button>
+                  )}
                 </Grid>
                 <Grid
                   item
@@ -1048,6 +1256,7 @@ function Home({ signOut }) {
                   <Box display="flex" alignItems="center">
                     <SubmitForm
                       myAPI={myAPI}
+                      apipath={apipath}
                       myConstClass={myConstClass}
                       state={state}
                       setParentState={setParentState} // Pass the state updater function to update parent's state
@@ -1086,7 +1295,7 @@ function Home({ signOut }) {
                   <Button
                     variant="outlined"
                     onClick={() =>
-                      handleDownload(state.s3bucketfileName, false, false)
+                      handleDownload(state.s3bucketfileName, false, "")
                     }
                     startIcon={<DownloadIcon />}
                   >
@@ -1095,36 +1304,39 @@ function Home({ signOut }) {
                 )}
                 {state.status === myConstClass.STAUS_COMPLETE && (
                   <React.Fragment>
-                  <ServiceDialog handleDownload={handleDownload} data={state.serviceFileData} open={state.serviceDialogOpen} handleClose={handleServiceDialogClose}  />
-                  <Button
-                    variant="outlined"
-                    style={{ marginLeft: "20px" }}
-                    onClick={handleServiceDialogOpen}
-                    startIcon={<DownloadIcon />}
-                  >
-                    Generate Service file
-                  </Button>
+                    <ServiceFileGenerator
+                      formData={state.serviceFileData}
+                      handleDownload={handleDownload}
+                      lawyerId={state.LawyerId}
+                      serviceFileName={state.serviceFileName}
+                      caseid={state.caseId}
+                      showExceptionOnPage={showExceptionOnPage}
+                    />
                   </React.Fragment>
                 )}
                 {state.status === myConstClass.STAUS_COMPLETE && (
-                  <WordGenerator
+                  <DocumentGenerator
+                    formData={state.serviceFileData}
                     caseid={state.caseId}
                     handleDownload={handleDownload}
                     responseFileName={state.responseFileName}
                     questionTable={state.questionTable}
                     changeIsLoading={changeIsLoading}
                     isAttorneyDoc={false}
+                    showExceptionOnPage={showExceptionOnPage}
                   />
                 )}
 
                 {state.status === myConstClass.STAUS_COMPLETE && (
-                  <WordGenerator
+                  <DocumentGenerator
+                    formData={state.serviceFileData}
                     caseid={state.caseId}
                     handleDownload={handleDownload}
                     responseFileName={state.responseAttorneyFileName}
                     questionTable={state.questionTable}
                     changeIsLoading={changeIsLoading}
                     isAttorneyDoc={true}
+                    showExceptionOnPage={showExceptionOnPage}
                   />
                 )}
                 <IconButton variant="contained" onClick={refresh}>
@@ -1150,3 +1362,5 @@ function Home({ signOut }) {
 }
 
 export default Home;
+
+

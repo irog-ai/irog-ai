@@ -41,7 +41,7 @@
         },
         "getfilecontent": {
           "deploymentBucketName": "amplify-amplifyb06921edcf424-staging-6152b-deployment",
-          "s3Key": "amplify-builds/getfilecontent-686252764a4d654a6251-build.zip",
+          "s3Key": "amplify-builds/getfilecontent-347773766d6b6a746b64-build.zip",
           "secretsPathAmplifyAppId": "d8fil6fk6i7h6"
         },
         "getphonenumber": {
